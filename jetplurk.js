@@ -2,6 +2,7 @@
  *
  * Some code originaled from BobChao's JetWave 
  *   http://go.bobchao.net/jetwave
+ * With the help from littlebtc
  */
 
 var manifest = {
@@ -40,24 +41,32 @@ jetpack.slideBar.append( {
 
 			success: function(json){
 				var jsObject = JSON.parse(json);
-//				console.log(json)
+				//console.log(json)
 				
 				$(jsObject.plurks).each(
 					function(i){
 						var owner_id = jsObject.plurks[i].owner_id;
 						var owner_nickname = jsObject.plurks_users[owner_id].nick_name;
-						var content = owner_nickname + ": " + jsObject.plurks[i].content_raw + " content: " + jsObject.plurks[i].content +" response: " + jsObject.plurks[i].response_count + " " + jsObject.plurks[i].posted + " posted. ";
-						//console.log(content);
-						$(slider.contentDocument).find("msgs").append("<msg>" + owner_nickname + ": " + jsObject.plurks[i].content_raw + "</msg>");
+						var premalink = jsObject.plurks[i].plurk_id.toString(36)
+						var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\">' + owner_nickname + ' [' + jsObject.plurks[i].qualifier + '] ' + jsObject.plurks[i].content + '<br><span class=\"meta\"><a class=\"permalink\" href=\"http://plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a></span></msg>';
+						//console.log(content);				
+						$(slider.contentDocument).find("msgs").append(content);
+					}
+				);
+				
+				$(slider.contentDocument).find("msgs").find('a').click(function(e){		// Force all link open in new tabs, From littlebtc. 
+					if (this.href) { jetpack.tabs.open(this.href); }
+						e.preventDefault();
+						e.stopPropagation();
 					}
 				);
 											
 			},
 			error:function (xhr, textStatus, errorThrown){
 				console.log(xhr.status + textStatus + errorThrown);				
-			}       
+			} 
 
 		});
 
     },
-});
+})
