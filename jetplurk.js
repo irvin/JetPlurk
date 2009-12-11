@@ -31,7 +31,7 @@ jetpack.future.import('slideBar')
 jetpack.slideBar.append( {
     icon: "http://www.plurk.com/favicon.ico",
     width: 250,
-    html: "<style>body {margin: 0; padding: 0; padding-top: 45px; background: url(https://wave.google.com/wave/static/images/logo_preview.png) top left no-repeat; border-right: 1px solid lightgray; background-color: white; font-size: 11px;}msgs {display: block;}msg {display: block; border-bottom:solid lightgray 1px; position: relative; padding: 4px 4px; min-height: 3em;}msg:hover {background-color: lightgreen;}msg subject {display: block; margin-right: 10px; font-size: 12px;}msg subject.unread {font-weight: bolder;}msg unread-count {display: block; position: absolute; top: 2px; right: 0; background-color: darkgreen; color: white; font-size: 11px; padding: 0 5px; -moz-border-radius: 10px;}msg preview {color: gray;}#container {position: absolute; top:50px; bottom:0; overflow: auto; border: 1px solid lightgray;} #jetwavehome {display:block; position: absolute; top:2px; right:2px;}</style><body><img id='jetwavehome' src='https://jetpackgallery.mozillalabs.com/favicon.ico'/><div id='container'><msgs></msgs></div></body>",
+    html: "<style>body {margin: 0; padding-top: 55px; background: url(http://www.plurk.com/static/logo.png) top left no-repeat; background-color: white; border-bottom:solid lightgray 1px; font-size: 12px;} msgs {display: block; max-width: 245px; overflow: hidden; } msg {display: block; border-bottom:solid lightgray 1px; position: relative; padding: 2px; min-height: 2.5em;} msg:hover {background-color: lightgreen;}</style><body><div id='container'><msgs></msgs></div></body>",
     onClick: function(slider){
 
 		$.ajax({
