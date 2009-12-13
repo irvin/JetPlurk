@@ -1,7 +1,7 @@
-/* JetPlurk 0.0008
+/* JetPlurk 0.0009
  * cc:by-sa 
  * Author: Irvin 
- * With the help from littlebtc & MozTW community
+ * With the help from littlebtc, BobChao & MozTW community
  * Some code adapted from BobChao's JetWave http://go.bobchao.net/jetwave
  */
 
