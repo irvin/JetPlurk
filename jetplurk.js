@@ -28,7 +28,6 @@ loginStr.username = set.jetplurk.username;
 loginStr.password = set.jetplurk.password;  
 loginStr.api_key = plurk_ApiKey;  
 
-var sliderObj = null;
 var NewOffset = new Date( );	// To remember latest loaded plurk timestamp
 var OldOffset = new Date( );	// Oldest loaded plurk timestamp
 console.log('Begin: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset);
@@ -42,7 +41,6 @@ jetpack.slideBar.append( {
 
     onReady: function(slider){	
     	// When sidebar ready, preform login and get newest plurk
-
 		$.ajax({
 			url: "http://www.plurk.com/API/Users/login",
 			data: loginStr,
@@ -58,15 +56,16 @@ jetpack.slideBar.append( {
 						var owner_display_name = jsObject.plurks_users[owner_id].display_name;
 						var premalink = jsObject.plurks[i].plurk_id.toString(36);
 						var read = jsObject.plurks[i].is_unread;
-						var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\">' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] <content';
+						var response_count = jsObject.plurks[i].response_count
+						var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\"><span class=\"responseNum\">' + response_count + ' </span>' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] <content';
 						if (read == 0){ //read
 							content += '>';
 						}
-						if (read == 1){	//unread
+						if (read == 1 || jsObject.plurks[i].responses_seen < response_count){	//unread
 							content += ' class=\"unread\">';
 						}
 						content += jsObject.plurks[i].content + '</content><br><span class=\"meta\">' + jsObject.plurks[i].posted + ' <a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a></span></msg>';
-						//console.log(content);				
+						console.log(content);				
 						$(slider.contentDocument).find("msgs").append(content);
 						OldOffset = jsObject.plurks[i].posted;
 					}
@@ -90,7 +89,6 @@ jetpack.slideBar.append( {
 			} 
 
 		});
-		
     },
 
 
@@ -98,33 +96,46 @@ jetpack.slideBar.append( {
     onClick: function(slider){
 	    	var getPlurk = {};
 	    	getPlurk.api_key = plurk_ApiKey;  
-	    	getPlurk.offset = "2009-6-20T21:55:34";  
+	    	getPlurk.offset = '2009-6-20T21:55:34';  
 	    	
 			//jetpack.notifications.show("Slider onClick");
 	 
-	    	$.ajax({
+		$.ajax({
 			url: "http://www.plurk.com/API/Polling/getPlurks",
 			data: getPlurk,
-	
+
 			success: function(json){
-				// throw the polling newest plurk
-				// var jsObject = JSON.parse(json);
-				console.log(json)
-				
-				/*				
+				// When login success, throw the newest plurk come with login
+				console.log('Polling success')
+
+				$(slider.contentDocument).find("msg").remove();
+
+				var jsObject = JSON.parse(json);
+				//console.log(json)
+
 				$(jsObject.plurks).each(
 					function(i){
 						var owner_id = jsObject.plurks[i].owner_id;
-						var owner_display_name = jsObject.plurk_users[owner_id].display_name;
-						var premalink = jsObject.plurks[i].plurk_id.toString(36)
-						var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\">' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] ' + jsObject.plurks[i].content + '<br><span class=\"meta\">' + jsObject.plurks[i].posted + ' <a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a></span></msg>';
-						//console.log(content);				
+						var owner_display_name = jsObject.plurks_users[owner_id].display_name;
+						var premalink = jsObject.plurks[i].plurk_id.toString(36);
+						var read = jsObject.plurks[i].is_unread;
+						var response_count = jsObject.plurks[i].response_count
+						var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\"><span class=\"responseNum\">' + response_count + ' </span>' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] <content';
+						if (read == 0){ //read
+							content += '>';
+						}
+						if (read == 1 || jsObject.plurks[i].responses_seen < response_count){	//unread
+							content += ' class=\"unread\">';
+						}
+						content += jsObject.plurks[i].content + '</content><br><span class=\"meta\">' + jsObject.plurks[i].posted + ' <a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a></span></msg>';
+						console.log(content);				
 						$(slider.contentDocument).find("msgs").append(content);
+						OldOffset = jsObject.plurks[i].posted;
 					}
 				);
 				
 				NewOffset = (new Date( )).toUTCString();
-				console.log('End polling: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset);
+				console.log('End login: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset);
 				
 				$(slider.contentDocument).find("msgs").find('a').click(function(e){
 					// Force all link open in new tabs, From littlebtc. 
@@ -133,16 +144,15 @@ jetpack.slideBar.append( {
 						e.stopPropagation();
 					}
 				);
-				*/
-				
+										
 			},
 			error:function (xhr, textStatus, errorThrown){
-				// Polling plurk error
+				// Login error
 				console.log(xhr.status + textStatus + errorThrown);				
 			} 
-	
+
 		});
-    },
+	},
     
     onSelect: function(slider){
   
@@ -152,25 +162,27 @@ jetpack.slideBar.append( {
 				var selectPlurkRead = $(this).find("content").attr("class");
 
 				console.log("HOVER! " + selectPlurkID + " Read: " + selectPlurkRead);
-				console.log(selectPlurkID + 1);
-				
-				
+								
 				if (selectPlurkRead == 'unread'){
-						
+					//var readPlurk="[" + selectPlurkID + "]";
+					var readPlurk = [ selectPlurkID ];
+
 					$.ajax({
 						url: "http://www.plurk.com/API/Timeline/markAsRead",
-						data: {
-							"api_key": loginStr.api_key,
-							"ids": [selectPlurkID]
-						},
+						data: ({
+							'api_key': loginStr.api_key,
+							//"ids": readPlurk,
+							'ids': JSON.stringify(readPlurk),
+						}),
 						success: function(json){
 							console.log(json);
-//							var jsObject = JSON.parse(json);
-//							console.log(jsObject.);
-							$(this).find("content").removeClass("unread");					
+      						$(slider.contentDocument).find("#"+selectPlurkID).find("content").removeClass("unread");
+      						//$(slider.contentDocument).find("#"+selectPlurkID).find("content").css({'font-size' : 'large'});
+
+      						//$(this).find("content").removeClass("unread");					
 						},
 						error:function (xhr, textStatus, errorThrown){
-							console.log(xhr.status + textStatus + errorThrown);				
+							console.log(xhr.status +" "+textStatus + " " + errorThrown);				
 						} 
 					});
 
