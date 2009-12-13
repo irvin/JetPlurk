@@ -87,22 +87,24 @@ jetpack.slideBar.append( {
     onClick: function(slider){
     	var getPlurk = {};
     	getPlurk.api_key = plurk_ApiKey;  
-    	getPlurk.offset = "2009-12-12T11:45:00";
+    	getPlurk.offset = "2009-6-20T21:55:34";  
     	
-		//jetpack.notifications.show("Slider onClick, api: " + getPlurk.api_key + " Offset: " + getPlurk.offset);
+		//jetpack.notifications.show("Slider onClick");
  
     	$.ajax({
 			url: "http://www.plurk.com/API/Polling/getPlurks",
 			data: getPlurk,
 
 			success: function(json){
-				// When login success, throw the newest plurk come with login
-				var jsObject = JSON.parse(json);
+				// throw the polling newest plurk
+				// var jsObject = JSON.parse(json);
 				console.log(json)
+				
+				/*				
 				$(jsObject.plurks).each(
 					function(i){
 						var owner_id = jsObject.plurks[i].owner_id;
-						var owner_display_name = jsObject.plurks_users[owner_id].display_name;
+						var owner_display_name = jsObject.plurk_users[owner_id].display_name;
 						var premalink = jsObject.plurks[i].plurk_id.toString(36)
 						var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\">' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] ' + jsObject.plurks[i].content + '<br><span class=\"meta\">' + jsObject.plurks[i].posted + ' <a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a></span></msg>';
 						//console.log(content);				
@@ -120,7 +122,8 @@ jetpack.slideBar.append( {
 						e.stopPropagation();
 					}
 				);
-											
+				*/
+				
 			},
 			error:function (xhr, textStatus, errorThrown){
 				// Polling plurk error
