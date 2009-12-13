@@ -1,4 +1,4 @@
-/* JetPlurk 0.0009
+/* JetPlurk 0.009
  * cc:by-sa 
  * Author: Irvin 
  * With the help from littlebtc, BobChao & MozTW community
