@@ -1,4 +1,4 @@
-/* JetPlurk 0.0007
+/* JetPlurk 0.0008
  * cc:by-sa 
  * Author: Irvin 
  * With the help from littlebtc & MozTW community
