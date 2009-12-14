@@ -29,10 +29,17 @@ loginStr.username = set.jetplurk.username;
 loginStr.password = set.jetplurk.password;  
 loginStr.api_key = "LGMTGe6MKqjPnplwd4xHkUFTXjKOy6lJ";
 
+jetpack.future.import("storage.simple");
+var myStorage = jetpack.storage.simple;
 
 var sliderObj = null;			// Save slide object
 var NewOffset = Date.parse(new Date());	// To remember latest refresh time
-var ReadOffset = Date.parse("January 1, 1975 00:00:00");	// Latest read plurk post time
+//var ReadOffset = Date.parse("January 1, 1975 00:00:00");
+if (myStorage.ReadOffset == null){	
+	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");;
+	console.log('Init. myStorage.ReadOffset: ' + myStorage.ReadOffset);
+}
+var ReadOffset = myStorage.ReadOffset;	// Latest read plurk post time
 var OldOffset = Date.parse(new Date());	// Oldest loaded plurk timestamp
 console.log('Begin: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
 
@@ -83,8 +90,7 @@ function reFreshPlurk() {
 					var response_count = jsObject.plurks[i].response_count;
 					var response_seen = jsObject.plurks[i].responses_seen;
 					var postedtime = jsObject.plurks[i].posted;
-					var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\"><span class=\"responseNum\">' + response_seen + ' ' + response_count + ' ' + jsObject.plurks[i].is_unread + ' </span>' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] <content';
-
+					var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\"><span class=\"responseNum\">' + response_seen + ' ' + response_count + ' ' + read + ' </span>' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] <content';
 					if ((read == 1) || ((ReadOffset < Date.parse(postedtime)) && (response_count == 0))){	// If message is unread
 						content += ' class=\"unread\">';
 					}else if (response_seen < response_count) {	// If message response num. higher than seen-responses number
@@ -92,11 +98,10 @@ function reFreshPlurk() {
 					}else { //Message is read
 						content += '>';
 					}
-
-					content += jsObject.plurks[i].content + '</content><br><span class=\"meta\"><timestamp>' + jsObject.plurks[i].posted + ' </timestamp><a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a></span></msg>';
-					console.log(content);
+					content += jsObject.plurks[i].content + '</content><br><span class=\"meta\"><timestamp>' + postedtime + ' </timestamp><a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a></span></msg>';
+					// console.log(content);
 					$(sliderObj.contentDocument).find("msgs").append(content);
-					OldOffset = jsObject.plurks[i].posted;	// Remember oldest loaded plurk time
+					OldOffset = Date.parse(postedtime);	// Remember oldest loaded plurk time
 				}
 			);
 			
@@ -105,10 +110,10 @@ function reFreshPlurk() {
 			$(sliderObj.contentDocument).find("msg").hover(
 				function () {
 					var hoverMsg = $(this);
-					var selectPlurkID = parseInt($(this).attr("id"));
-					var selectPlurkRead = $(this).find("content").attr("class");
-					var selectPlurkTimestamp = Date($(this).find("timestamp").text());
-					console.log('HOVER! ' + selectPlurkID + ' Read: ' + selectPlurkRead + ' Plurk time: ' + selectPlurkTimestamp);
+					var selectPlurkID = parseInt(hoverMsg.attr("id"));
+					var selectPlurkRead = hoverMsg.find("content").attr("class");
+					var selectPlurkTimestamp = hoverMsg.find("timestamp").text();
+					console.log('Hover: ' + selectPlurkID + ' Read [' + selectPlurkRead + '] Plurk time: ' + selectPlurkTimestamp + Date.parse(selectPlurkTimestamp) + ' ReadOffset ' + ReadOffset);
 					
 					if ((selectPlurkRead == 'unread')||(selectPlurkRead == 'unreadresponse')){
 						//if unread or unreadresponse, set to read when hover
@@ -122,14 +127,14 @@ function reFreshPlurk() {
 							success: function(json){
 								console.log('Set read: ' + json);
 								$(hoverMsg).find("content").removeClass("unread").removeClass("unreadresponse");
-								console.log('selectPlurkTimestamp: ' + Date.parse(selectPlurkTimestamp) + ' ReadOffset ' + ReadOffset);
 								if (Date.parse(selectPlurkTimestamp) > ReadOffset){
 									ReadOffset = Date.parse(selectPlurkTimestamp);
-									console.log('ReadOffset update: ' + ReadOffset);
+									myStorage.ReadOffset = ReadOffset;
+									console.log('myStorage.ReadOffset update: ' + myStorage.ReadOffset);
 								}
 							},
 							error: function(xhr, textStatus, errorThrown){
-								console.log('Set read error: ' + xhr.status +" "+textStatus + " " + errorThrown);				
+								console.log('Set read error: ' + xhr.status + ' ' + textStatus + ' ' + errorThrown);				
 							} 
 						});
 	
@@ -140,8 +145,8 @@ function reFreshPlurk() {
 				}
 			);
 			
-			NewOffset = (new Date( )).toUTCString();	// Rememver refresh time
-			console.log('End login: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
+			NewOffset = Date.parse(new Date());	// Rememver refresh time
+			console.log('End refresh: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
 			
 			$(sliderObj.contentDocument).find("msgs").find('a').click(function(e){
 				// Force all link open in new tabs, From littlebtc. 
@@ -154,10 +159,9 @@ function reFreshPlurk() {
 		},
 		error: function(xhr, textStatus, errorThrown){
 			// Login error
-			console.log(xhr.status + textStatus + errorThrown);				
+			console.log('Login error: ' + xhr.status + ' ' + textStatus + ' ' + errorThrown);				
 		} 
 
 	});
 
 };
-
