@@ -1,10 +1,9 @@
-/* JetPlurk 0.009
+/* JetPlurk 0.010
  * cc:by-sa 
- * Author: Irvin 
- * With the help from littlebtc, BobChao & MozTW community
- * Some code adapted from BobChao's JetWave http://go.bobchao.net/jetwave
+ * Author: Irvin (irvinfly@gmail.com)
+ * With the help from littlebtc, BobChao, Timdream & MozTW community.
+ * Some codes adapted from JetWave http://go.bobchao.net/jetwave
  */
-
 
 // Save username & password
 var manifest = {

@@ -6,4 +6,5 @@ irvinfly@gmail.com
 0.006: force link open in tab; add permalink; style adjustment
 0.007: show display_name, time, adjust meta style
 0.008: onSelect slide msgs:hover to set unread to read works now, onClick Polling don't work than.
-0.009: Refresh work now, set read work now except msg has response (cause api always return json that any responses_seen as 0)
+0.009: Refresh work now, set read work now except msg has response (cause api always return any responses_seen as 0)
+0.010: New plurk with no response show as unread fix, implement simple storage to remember last read time.
