@@ -47,7 +47,7 @@ jetpack.future.import('slideBar')
 jetpack.slideBar.append( {
     icon: "http://www.plurk.com/favicon.ico",
     width: 250,
-    html: "<style>body {margin: 0; background-color: white; border-bottom:solid lightgray 1px; font-size: 12px;} #banner {display:block;} #banner img {border:0px; } msgs {display: block; max-width: 245px; overflow: hidden; } msg {display: block; border-bottom:solid lightgray 1px; position: relative; padding: 4px; min-height: 2.5em;} msg:hover {background-color: lightgreen;}  msgs .unread {font-weight: bold;} msgs .unreadresponse {color: darkslategray;} msgs .meta { margin-top:2px; display:block; color: DarkGray; text-align: right; font-size: 0.9em;}</style><body><div id='banner'><a href='http://www.plurk.com' target='_blank'><img src='http://www.plurk.com/static/logo.png'></a></div><div id='container'><msgs><msg></msg></msgs></div></body>",
+    html: "<style>body {margin: 0; background-color: white; border-bottom:solid lightgray 1px; font-size: 12px;} #banner {display:block;} #banner img {border:0px; } msgs {display: block; max-width: 245px; overflow: hidden; } msg {display: block; border-bottom:solid lightgray 1px; position: relative; padding: 4px; min-height: 2.5em;} msg:hover {background-color: lightgreen;}  msgs .unread {font-weight: bold;} msgs .unreadresponse {color: DarkGreen; font-weight: bold;} msgs .meta { margin-top:2px; display:block; color: DarkGray; text-align: right; font-size: 0.9em;}</style><body><div id='banner'><a href='http://www.plurk.com' target='_blank'><img src='http://www.plurk.com/static/logo.png'></a></div><div id='container'><msgs><msg></msg></msgs></div></body>",
 
 	onReady: function(slider){	
 		// When sidebar ready, preform reFreshPlurk()
