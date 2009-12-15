@@ -1,4 +1,4 @@
-/* JetPlurk 0.010
+/* JetPlurk 0.011
  * cc:by-sa 
  * Author: Irvin (irvinfly@gmail.com)
  * With the help from littlebtc, BobChao, Timdream & MozTW community.
@@ -40,8 +40,7 @@ if (myStorage.ReadOffset == null){
 }
 var ReadOffset = myStorage.ReadOffset;	// Latest read plurk post time
 var OldOffset = Date.parse(new Date());	// Oldest loaded plurk timestamp
-console.log('Begin: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
-
+console.log('JetPlurk Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
 
 jetpack.future.import('slideBar') 
 jetpack.slideBar.append( {
@@ -54,20 +53,17 @@ jetpack.slideBar.append( {
 		sliderObj = slider;
 		reFreshPlurk();	
 	},
-
     
 	onClick: function(slider){
 		// preform reFreshPlurk() when click at plurk icon on slide
 		reFreshPlurk();
 	},
 
-
 });
 
 
 function reFreshPlurk() {
 	// When reFreshPlurk, preform login and get newest plurk
-	console.log("reFreshPlurk")
 
 	$.ajax({
 		url: "http://www.plurk.com/API/Users/login",
@@ -109,7 +105,7 @@ function reFreshPlurk() {
 			);
 			
 			NewOffset = Date.parse(new Date());	// Rememver refresh time
-			console.log('End refresh: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
+			console.log('JetPlurk refresh: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
 			
 			// Add hover event listener on each msg
 			$(sliderObj.contentDocument).find("msg").hover(
@@ -118,7 +114,7 @@ function reFreshPlurk() {
 					var selectPlurkID = parseInt(hoverMsg.attr("id"));
 					var selectPlurkRead = hoverMsg.find("content").attr("class");
 					var selectPlurkTimestamp = hoverMsg.find("timestamp").text();
-					console.log('Hover: ' + selectPlurkID + ' Read [' + selectPlurkRead + '] Plurk time: ' + selectPlurkTimestamp + Date.parse(selectPlurkTimestamp) + ' ReadOffset ' + ReadOffset);
+					//console.log('Hover: ' + selectPlurkID + ' Read [' + selectPlurkRead + '] Plurk time: ' + selectPlurkTimestamp + Date.parse(selectPlurkTimestamp) + ' ReadOffset ' + ReadOffset);
 					
 					if ((selectPlurkRead == 'unread')||(selectPlurkRead == 'unreadresponse')){
 						//if unread or unreadresponse, set to read when hover
@@ -130,12 +126,12 @@ function reFreshPlurk() {
 								'note_position': true,
 							}),
 							success: function(json){
-								console.log('Set read: ' + json);
+								//console.log('Set read: ' + json);
 								$(hoverMsg).find("content").removeClass("unread").removeClass("unreadresponse");
 								if (Date.parse(selectPlurkTimestamp) > ReadOffset){
 									ReadOffset = Date.parse(selectPlurkTimestamp);
 									myStorage.ReadOffset = ReadOffset;
-									console.log('myStorage.ReadOffset update: ' + myStorage.ReadOffset);
+									//console.log('myStorage.ReadOffset update: ' + myStorage.ReadOffset);
 								}
 							},
 							error: function(xhr, textStatus, errorThrown){
@@ -156,7 +152,7 @@ function reFreshPlurk() {
 					var clickMsg = $(this);
 					var selectPlurkID = parseInt(clickMsg.attr("id"));
 					var selectPlurkResponseNum = clickMsg.find("responseNum").text();
-					console.log('Click: ' + selectPlurkID + ' responseNum ' + selectPlurkResponseNum);
+					//console.log('Click: ' + selectPlurkID + ' responseNum ' + selectPlurkResponseNum);
 
 					if ((selectPlurkResponseNum != "") && ($(clickMsg).find("responses").text() == "")){
 						// If click msg has response & not showing now, get response
