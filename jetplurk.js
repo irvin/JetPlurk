@@ -146,14 +146,7 @@ function reFreshPlurk() {
 					}
 				},
 				function () {
-					var hoverMsg = $(this);
 					//console.log("unHOVER!");
-					if ($(hoverMsg).find("responses").text() != ""){
-						// If showing response now, remove it
-						$(hoverMsg).find("responses").fadeOut('fast',function (){
-							$(hoverMsg).find("responses").remove();
-						});
-					}
 				}
 			);
 
@@ -165,7 +158,7 @@ function reFreshPlurk() {
 					var selectPlurkResponseNum = clickMsg.find("responseNum").text();
 					console.log('Click: ' + selectPlurkID + ' responseNum ' + selectPlurkResponseNum);
 
-					if ((selectPlurkResponseNum != '0') && ($(clickMsg).find("responses").text() == "")){
+					if ((selectPlurkResponseNum != "") && ($(clickMsg).find("responses").text() == "")){
 						// If click msg has response & not showing now, get response
 						$.ajax({
 							url: "http://www.plurk.com/API/Responses/get",
@@ -196,6 +189,11 @@ function reFreshPlurk() {
 								console.log('Get response error: ' + xhr.status + ' ' + textStatus + ' ' + errorThrown);				
 							} 
 						});
+					}else if ($(clickMsg).find("responses").text() != ""){
+							// If showing response now, remove it
+							$(clickMsg).find("responses").fadeOut('fast',function (){
+								$(clickMsg).find("responses").remove();
+							});
 					}
 
 				}
