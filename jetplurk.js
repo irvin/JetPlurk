@@ -47,7 +47,7 @@ jetpack.future.import('slideBar')
 jetpack.slideBar.append( {
     icon: "http://www.plurk.com/favicon.ico",
     width: 250,
-    html: "<style>body {margin: 0; background-color: BurlyWood; border-bottom:solid lightgray 1px; font-size: 12px; line-height: 1.3em;} #banner {display:block;} #banner img {border:0px; } msgs {display: block; max-width: 245px; overflow: hidden; } msg {display: block; background-color: Snow; -moz-border-radius: 5px; padding: 2px; margin: 2px; min-height: 2.5em;} msg:hover {background-color: White;}  msgs .unread {font-weight: bold;} msgs .unreadresponse {color: DarkGreen; font-weight: bold;} msgs .meta { margin-top:2px; display:block; color: DarkGray; text-align: right; font-size: 0.9em;} responses {display: block; line-height: 1.1em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 2px;} response {display: block; margin:0;} </style><body><div id='banner'><a href='http://www.plurk.com' target='_blank'><img src='http://www.plurk.com/static/logo.png'></a></div><div id='container'><msgs><msg></msg></msgs></div></body>",
+    html: "<style>body {margin: 0; background-color: BurlyWood; border-bottom:solid lightgray 1px; font-size: 12px; line-height: 1.3em;} #banner {display:block;} #banner img {border:0px; } msgs {display: block; max-width: 245px; overflow: hidden; } msg {display: block; background-color: Snow; -moz-border-radius: 5px; padding: 2px; margin: 2px; min-height: 2.5em; position: relative;} msg:hover {background-color: White;} msgs .unread {font-weight: bold;} msgs .unreadresponse {color: DarkGreen; font-weight: bold;} msgs .meta {display:block; color: DarkGray; text-align: right; font-size: 0.9em;} msg responseNum {color: Chocolate; font-size: 2em; margin-left: 3px;} responses {display: block; line-height: 1.1em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 2px;} response {display: block; margin:0;} </style><body><div id='banner'><a href='http://www.plurk.com' target='_blank'><img src='http://www.plurk.com/static/logo.png'></a></div><div id='container'><msgs><msg></msg></msgs></div></body>",
 
 	onReady: function(slider){	
 		// When sidebar ready, preform reFreshPlurk()
@@ -89,7 +89,7 @@ function reFreshPlurk() {
 					var response_count = jsObject.plurks[i].response_count;
 					var response_seen = jsObject.plurks[i].responses_seen;
 					var postedtime = jsObject.plurks[i].posted;
-					var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\"><span class=\"responseNum\">' + response_count  + '</span> ' + response_seen + ' ' + read + ' ' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] <content';
+					var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\"> ' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] <content';
 					if ((read == 1) || ((ReadOffset < Date.parse(postedtime)) && (response_count == 0))){	// If message is unread
 						content += ' class=\"unread\">';
 					}else if (response_seen < response_count) {	// If message response num. higher than seen-responses number
@@ -97,7 +97,11 @@ function reFreshPlurk() {
 					}else { //Message is read
 						content += '>';
 					}
-					content += jsObject.plurks[i].content + '</content><br><span class=\"meta\"><timestamp>' + postedtime + ' </timestamp><a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a></span></msg>';
+					content += jsObject.plurks[i].content + '</content><br><span class=\"meta\"><timestamp>' + postedtime + ' </timestamp><a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a>';
+					if (response_count > 0){	// If has response
+							content += '<responseNum>' + response_count  + '</responseNum>';
+					}
+					content += '</span></msg>';
 					// console.log(content);
 					$(sliderObj.contentDocument).find("msgs").append(content);
 					OldOffset = Date.parse(postedtime);	// Remember oldest loaded plurk time
@@ -158,7 +162,7 @@ function reFreshPlurk() {
 				function () {
 					var clickMsg = $(this);
 					var selectPlurkID = parseInt(clickMsg.attr("id"));
-					var selectPlurkResponseNum = clickMsg.find("span.responseNum").text();
+					var selectPlurkResponseNum = clickMsg.find("responseNum").text();
 					console.log('Click: ' + selectPlurkID + ' responseNum ' + selectPlurkResponseNum);
 
 					if ((selectPlurkResponseNum != '0') && ($(clickMsg).find("responses").text() == "")){
