@@ -1,4 +1,4 @@
-/* JetPlurk 0.011
+/* JetPlurk 0.012dev
  * cc:by-sa 
  * Author: Irvin (irvinfly@gmail.com)
  * With the help from littlebtc, BobChao, Timdream & MozTW community.
@@ -74,136 +74,11 @@ function reFreshPlurk() {
 			var jsObject = JSON.parse(json);
 			// console.log(json)
 			$(sliderObj.contentDocument).find("msg").fadeOut('slow');	//Wipe out old msg
-			
-			// Display each plurk
-			$(jsObject.plurks).each(
-				function(i){
-					var owner_id = jsObject.plurks[i].owner_id;
-					var owner_display_name = jsObject.plurks_users[owner_id].display_name;
-					var premalink = jsObject.plurks[i].plurk_id.toString(36);
-					var read = jsObject.plurks[i].is_unread;
-					var response_count = jsObject.plurks[i].response_count;
-					var response_seen = jsObject.plurks[i].responses_seen;
-					var postedtime = jsObject.plurks[i].posted;
-					var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\"> ' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] <content';
-					if ((read == 1) || ((ReadOffset < Date.parse(postedtime)) && (response_count == 0))){	// If message is unread
-						content += ' class=\"unread\">';
-					}else if (response_seen < response_count) {	// If message response num. higher than seen-responses number
-						content += ' class=\"unreadresponse\" >';
-					}else { //Message is read
-						content += '>';
-					}
-					content += jsObject.plurks[i].content + '</content><br><span class=\"meta\"><timestamp>' + postedtime + ' </timestamp><a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a>';
-					if (response_count > 0){	// If has response
-							content += '<responseNum>' + response_count  + '</responseNum>';
-					}
-					content += '</span></msg>';
-					// console.log(content);
-					$(sliderObj.contentDocument).find("msgs").append(content);
-					OldOffset = Date.parse(postedtime);	// Remember oldest loaded plurk time
-				}
-			);
+
+			ShowNewPlurk(jsObject);
 			
 			NewOffset = Date.parse(new Date());	// Rememver refresh time
 			console.log('JetPlurk refresh: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
-			
-			// Add hover event listener on each msg
-			$(sliderObj.contentDocument).find("msg").hover(
-				function () {
-					var hoverMsg = $(this);
-					var selectPlurkID = parseInt(hoverMsg.attr("id"));
-					var selectPlurkRead = hoverMsg.find("content").attr("class");
-					var selectPlurkTimestamp = hoverMsg.find("timestamp").text();
-					//console.log('Hover: ' + selectPlurkID + ' Read [' + selectPlurkRead + '] Plurk time: ' + selectPlurkTimestamp + Date.parse(selectPlurkTimestamp) + ' ReadOffset ' + ReadOffset);
-					
-					if ((selectPlurkRead == 'unread')||(selectPlurkRead == 'unreadresponse')){
-						//if unread or unreadresponse, set to read when hover
-						$.ajax({
-							url: "http://www.plurk.com/API/Timeline/markAsRead",
-							data: ({
-								'api_key': loginStr.api_key,
-								'ids': JSON.stringify([ selectPlurkID ]),
-								'note_position': true,
-							}),
-							success: function(json){
-								//console.log('Set read: ' + json);
-								$(hoverMsg).find("content").removeClass("unread").removeClass("unreadresponse");
-								if (Date.parse(selectPlurkTimestamp) > ReadOffset){
-									ReadOffset = Date.parse(selectPlurkTimestamp);
-									myStorage.ReadOffset = ReadOffset;
-									//console.log('myStorage.ReadOffset update: ' + myStorage.ReadOffset);
-								}
-							},
-							error: function(xhr, textStatus, errorThrown){
-								console.log('Set read error: ' + xhr.status + ' ' + textStatus + ' ' + errorThrown);				
-							} 
-						});
-	
-					}
-				},
-				function () {
-					//console.log("unHOVER!");
-				}
-			);
-
-			// Add click event listener on each msg
-			$(sliderObj.contentDocument).find("msg").click(
-				function () {
-					var clickMsg = $(this);
-					var selectPlurkID = parseInt(clickMsg.attr("id"));
-					var selectPlurkResponseNum = clickMsg.find("responseNum").text();
-					//console.log('Click: ' + selectPlurkID + ' responseNum ' + selectPlurkResponseNum);
-
-					if ((selectPlurkResponseNum != "") && ($(clickMsg).find("responses").text() == "")){
-						// If click msg has response & not showing now, get response
-						$.ajax({
-							url: "http://www.plurk.com/API/Responses/get",
-							data: ({
-								'api_key': loginStr.api_key,
-								'plurk_id': selectPlurkID,
-								'from_response': 0,
-							}),
-							success: function(json){
-								//console.log('Get response: ' + json);
-								var jsObject = JSON.parse(json);
-
-								// Display each response
-								$(clickMsg).append('<responses></responses>');
-								$(jsObject.responses).each(
-									function(i){
-										var responser_id = jsObject.responses[i].user_id;
-										var responser_display_name = jsObject.friends[responser_id].display_name;
-										var postedtime = jsObject.responses[i].posted;
-										var content = '<response>' + responser_display_name + ' [' + jsObject.responses[i].qualifier_translated + '] ' + jsObject.responses[i].content + ' <span class=\"meta\"><timestamp>' + postedtime + '</timestamp></span></response>';
-										//console.log(content);
-										$(clickMsg).find("responses").append(content);
-									}
-								);
-								//console.log($(clickMsg).html());
-							},
-							error: function(xhr, textStatus, errorThrown){
-								console.log('Get response error: ' + xhr.status + ' ' + textStatus + ' ' + errorThrown);				
-							} 
-						});
-					}else if ($(clickMsg).find("responses").text() != ""){
-							// If showing response now, remove it
-							$(clickMsg).find("responses").fadeOut('fast',function (){
-								$(clickMsg).find("responses").remove();
-							});
-					}
-
-				}
-			);
-
-						
-			$(sliderObj.contentDocument).find("msgs").find('a').click(function(e){
-				// Force all link open in new tabs, From littlebtc. 
-				if (this.href) { jetpack.tabs.open(this.href); }
-					e.preventDefault();
-					e.stopPropagation();
-				}
-			);
-									
 		},
 		error: function(xhr, textStatus, errorThrown){
 			// Login error
@@ -213,3 +88,130 @@ function reFreshPlurk() {
 	});
 
 };
+
+function ShowNewPlurk(jsObject){
+	// Display each plurk
+	$(jsObject.plurks).each(
+		function(i){
+			var owner_id = jsObject.plurks[i].owner_id;
+			var owner_display_name = jsObject.plurks_users[owner_id].display_name;
+			var premalink = jsObject.plurks[i].plurk_id.toString(36);
+			var read = jsObject.plurks[i].is_unread;
+			var response_count = jsObject.plurks[i].response_count;
+			var response_seen = jsObject.plurks[i].responses_seen;
+			var postedtime = jsObject.plurks[i].posted;
+			var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\"> ' + owner_display_name + ' [' + jsObject.plurks[i].qualifier_translated + '] <content';
+			if ((read == 1) || ((ReadOffset < Date.parse(postedtime)) && (response_count == 0))){	// If message is unread
+				content += ' class=\"unread\">';
+			}else if (response_seen < response_count) {	// If message response num. higher than seen-responses number
+				content += ' class=\"unreadresponse\" >';
+			}else { //Message is read
+				content += '>';
+			}
+			content += jsObject.plurks[i].content + '</content><br><span class=\"meta\"><timestamp>' + postedtime + ' </timestamp><a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a>';
+			if (response_count > 0){	// If has response
+					content += '<responseNum>' + response_count  + '</responseNum>';
+			}
+			content += '</span></msg>';
+			// console.log(content);
+			$(sliderObj.contentDocument).find("msgs").append(content);
+			OldOffset = Date.parse(postedtime);	// Remember oldest loaded plurk time
+		}
+	);
+	
+	// Add hover event listener on each msg
+	$(sliderObj.contentDocument).find("msg").hover(
+	function () {
+		var hoverMsg = $(this);
+		var selectPlurkID = parseInt(hoverMsg.attr("id"));
+		var selectPlurkRead = hoverMsg.find("content").attr("class");
+		var selectPlurkTimestamp = hoverMsg.find("timestamp").text();
+		//console.log('Hover: ' + selectPlurkID + ' Read [' + selectPlurkRead + '] Plurk time: ' + selectPlurkTimestamp + Date.parse(selectPlurkTimestamp) + ' ReadOffset ' + ReadOffset);
+		
+		if ((selectPlurkRead == 'unread')||(selectPlurkRead == 'unreadresponse')){
+			//if unread or unreadresponse, set to read when hover
+			$.ajax({
+				url: "http://www.plurk.com/API/Timeline/markAsRead",
+				data: ({
+					'api_key': loginStr.api_key,
+					'ids': JSON.stringify([ selectPlurkID ]),
+					'note_position': true,
+				}),
+				success: function(json){
+					//console.log('Set read: ' + json);
+					$(hoverMsg).find("content").removeClass("unread").removeClass("unreadresponse");
+					if (Date.parse(selectPlurkTimestamp) > ReadOffset){
+						ReadOffset = Date.parse(selectPlurkTimestamp);
+						myStorage.ReadOffset = ReadOffset;
+						//console.log('myStorage.ReadOffset update: ' + myStorage.ReadOffset);
+					}
+				},
+				error: function(xhr, textStatus, errorThrown){
+					console.log('Set read error: ' + xhr.status + ' ' + textStatus + ' ' + errorThrown);				
+				} 
+			});
+	
+		}
+	},
+	function () {
+		//console.log("unHOVER!");
+	}
+	);
+	
+	// Add click event listener on each msg
+	$(sliderObj.contentDocument).find("msg").click(
+	function () {
+		var clickMsg = $(this);
+		var selectPlurkID = parseInt(clickMsg.attr("id"));
+		var selectPlurkResponseNum = clickMsg.find("responseNum").text();
+		//console.log('Click: ' + selectPlurkID + ' responseNum ' + selectPlurkResponseNum);
+	
+		if ((selectPlurkResponseNum != "") && ($(clickMsg).find("responses").text() == "")){
+			// If click msg has response & not showing now, get response
+			$.ajax({
+				url: "http://www.plurk.com/API/Responses/get",
+				data: ({
+					'api_key': loginStr.api_key,
+					'plurk_id': selectPlurkID,
+					'from_response': 0,
+				}),
+				success: function(json){
+					//console.log('Get response: ' + json);
+					var jsObject = JSON.parse(json);
+	
+					// Display each response
+					$(clickMsg).append('<responses></responses>');
+					$(jsObject.responses).each(
+						function(i){
+							var responser_id = jsObject.responses[i].user_id;
+							var responser_display_name = jsObject.friends[responser_id].display_name;
+							var postedtime = jsObject.responses[i].posted;
+							var content = '<response>' + responser_display_name + ' [' + jsObject.responses[i].qualifier_translated + '] ' + jsObject.responses[i].content + ' <span class=\"meta\"><timestamp>' + postedtime + '</timestamp></span></response>';
+							//console.log(content);
+							$(clickMsg).find("responses").append(content);
+						}
+					);
+					//console.log($(clickMsg).html());
+				},
+				error: function(xhr, textStatus, errorThrown){
+					console.log('Get response error: ' + xhr.status + ' ' + textStatus + ' ' + errorThrown);				
+				} 
+			});
+		}else if ($(clickMsg).find("responses").text() != ""){
+				// If showing response now, remove it
+				$(clickMsg).find("responses").fadeOut('fast',function (){
+					$(clickMsg).find("responses").remove();
+				});
+		}
+	
+	}
+	);
+			
+	$(sliderObj.contentDocument).find("msgs").find('a').click(function(e){
+	// Force all link open in new tabs, From littlebtc. 
+	if (this.href) { jetpack.tabs.open(this.href); }
+		e.preventDefault();
+		e.stopPropagation();
+	}
+	);
+}
