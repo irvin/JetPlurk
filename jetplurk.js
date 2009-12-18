@@ -25,17 +25,17 @@ var manifest = {
 jetpack.future.import("storage.settings");
 set = jetpack.storage.settings;
 
-var loginStr = {};
-loginStr.username = set.jetplurk.username;
-loginStr.password = set.jetplurk.password;
-loginStr.api_key = "LGMTGe6MKqjPnplwd4xHkUFTXjKOy6lJ";
+var loginStr = {
+	username : set.jetplurk.username,
+	password : set.jetplurk.password,
+	api_key : 'LGMTGe6MKqjPnplwd4xHkUFTXjKOy6lJ'
+};
 
 jetpack.future.import("storage.simple");
 var myStorage = jetpack.storage.simple;
 
 var sliderObj = null; // Save slide object
 var NewOffset = Date.parse(new Date()); // To remember latest refresh time
-// var ReadOffset = Date.parse("January 1, 1975 00:00:00");
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");;
 	console.log('Init. myStorage.ReadOffset: ' + myStorage.ReadOffset);
@@ -55,6 +55,7 @@ jetpack.slideBar.append({
 		// When sidebar ready, preform reFreshPlurk()
 		sliderObj = slider;
 		reFreshPlurk();
+		
 		// Add click event listener on loadmore button
 		$(sliderObj.contentDocument).find('#loadmore').click(function() {
 					loadMorePlurk();
@@ -78,12 +79,12 @@ function reFreshPlurk() {
 				// When login success, throw the newest plurk come with login
 				success : function(json) {
 					var jsObject = JSON.parse(json);
-					// console.log(json)
+					//console.log(json)
 
 					// Wipe out old msg
 					$(sliderObj.contentDocument).find("msg").fadeOut('slow');
 					ShowNewPlurk(jsObject);
-					NewOffset = Date.parse(new Date()); // Rememver refresh time
+					NewOffset = Date.parse(new Date()); // Remember refresh time
 					console.log('JetPlurk refresh: NewOffset ' + NewOffset
 							+ ' OldOffset ' + OldOffset + ' ReadOffset '
 							+ ReadOffset);
@@ -140,29 +141,42 @@ function loadMorePlurk() {
 
 function ShowNewPlurk(jsObject) {
 	// Display each plurk
+	
 	$(jsObject.plurks).each(function(i) {
 		var owner_id = jsObject.plurks[i].owner_id;
-		var owner_display_name = jsObject.plurks_users[owner_id].display_name;
+		if (jsObject.plurks_users[owner_id].display_name != null) {
+			var owner_display_name = jsObject.plurks_users[owner_id].display_name;
+		} else {
+			var owner_display_name = jsObject.plurks_users[owner_id].nick_name
+		}	
+		if (jsObject.plurks[i].qualifier_translated != null) {
+			// English qualifier
+			var qualifier = jsObject.plurks[i].qualifier_translated;
+		} else {
+			var qualifier = jsObject.plurks[i].qualifier;
+		}
 		var premalink = jsObject.plurks[i].plurk_id.toString(36);
 		var read = jsObject.plurks[i].is_unread;
 		var response_count = jsObject.plurks[i].response_count;
 		var response_seen = jsObject.plurks[i].responses_seen;
 		var postedtime = jsObject.plurks[i].posted;
+		
 		var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\"> '
-				+ owner_display_name + ' ['
-				+ jsObject.plurks[i].qualifier_translated + '] <content';
-
+				+ owner_display_name + ' ';
+		if (qualifier != '') {
+			content += '[' + qualifier + '] ';
+		}
 		if ((read == 1)
 				|| ((ReadOffset < Date.parse(postedtime)) && (response_count == 0))) {
 			// If message is unread
-			content += ' class=\"unread\">';
+			content += '<content class=\"unread\">';
 		} else if (response_seen < response_count) {
 			// If message response num. higher than seen-responses number
-			content += ' class=\"unreadresponse\" >';
-		} else { // Message is read
-			content += '>';
+			content += '<content class=\"unreadresponse\" >';
+		} else {
+			// Message is read
+			content += '<content>';
 		}
-
 		content += jsObject.plurks[i].content
 				+ '</content><br><span class=\"meta\"><timestamp>'
 				+ postedtime
@@ -245,12 +259,24 @@ function ShowNewPlurk(jsObject) {
 					$(clickMsg).append('<responses></responses>');
 					$(jsObject.responses).each(function(i) {
 						var responser_id = jsObject.responses[i].user_id;
-						var responser_display_name = jsObject.friends[responser_id].display_name;
+						if (jsObject.friends[responser_id].display_name != '') {
+							var responser_display_name = jsObject.friends[responser_id].display_name;
+						} else {
+							var responser_display_name = jsObject.friends[responser_id].nick_name;
+						}
 						var postedtime = jsObject.responses[i].posted;
+						if (jsObject.responses[i].qualifier_translated != null) {
+							// English qualifier
+							var qualifier = jsObject.responses[i].qualifier_translated;
+						} else {
+							var qualifier = jsObject.responses[i].qualifier;
+						}
 						var content = '<response>' + responser_display_name
-								+ ' ['
-								+ jsObject.responses[i].qualifier_translated
-								+ '] ' + jsObject.responses[i].content
+								+ ' ';
+						if (qualifier != '') {
+							content += '[' + qualifier + '] ';
+						}
+						content += jsObject.responses[i].content
 								+ ' <span class=\"meta\"><timestamp>'
 								+ postedtime + '</timestamp></span></response>';
 						// console.log(content);
