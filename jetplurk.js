@@ -68,7 +68,6 @@ jetpack.slideBar.append({
 
 });
 
-
 function reFreshPlurk() {
 	// When reFreshPlurk, preform login and get newest plurk
 
@@ -80,7 +79,7 @@ function reFreshPlurk() {
 				success : function(json) {
 					var jsObject = JSON.parse(json);
 					// console.log(json)
-					
+
 					// Wipe out old msg
 					$(sliderObj.contentDocument).find("msg").fadeOut('slow');
 					ShowNewPlurk(jsObject);
@@ -138,7 +137,6 @@ function loadMorePlurk() {
 				}
 			});
 };
-
 
 function ShowNewPlurk(jsObject) {
 	// Display each plurk
