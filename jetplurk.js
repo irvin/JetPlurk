@@ -45,13 +45,18 @@ console.log('JetPlurk Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset
 jetpack.future.import('slideBar') 
 jetpack.slideBar.append( {
     icon: "http://www.plurk.com/favicon.ico",
-    width: 250,
-    html: "<style>body {margin: 0; background-color: BurlyWood; border-bottom:solid lightgray 1px; font-size: 12px; line-height: 1.3em;} #banner {display:block;} #banner img {border:0px; } msgs {display: block; max-width: 245px; overflow: hidden; } msg {display: block; background-color: Snow; -moz-border-radius: 5px; padding: 2px; margin: 2px; min-height: 2.5em; position: relative;} msg:hover {background-color: White;} msgs .unread {font-weight: bold;} msgs .unreadresponse {color: DarkGreen; font-weight: bold;} msgs .meta {display:block; color: DarkGray; text-align: right; font-size: 0.9em;} msg responseNum {color: Chocolate; font-size: 2em; margin-left: 3px;} responses {display: block; line-height: 1.1em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 2px;} response {display: block; margin:0;} </style><body><div id='banner'><a href='http://www.plurk.com' target='_blank'><img src='http://www.plurk.com/static/logo.png'></a></div><div id='container'><msgs><msg></msg></msgs></div></body>",
+    width: 300,
+    html: "<style>body {margin: 0; background-color: BurlyWood; border-bottom:solid lightgray 1px; font-size: 12px; line-height: 1.3em;} #banner {display:block;} #banner img {border:0px; } msgs {display: block; margin: 0 1px; overflow: hidden;} msg {display: block; background-color: Snow; -moz-border-radius: 5px; padding: 2px; margin: 3px; min-height: 2.5em; position: relative;} msg:hover {background-color: White;} msgs .unread {font-weight: bold;} msgs .unreadresponse {color: DarkGreen; font-weight: bold;} msgs .meta {display:block; color: DarkGray; text-align: right; font-size: 0.9em;} msg responseNum {color: Chocolate; font-size: 2em; margin-left: 3px;} responses {display: block; line-height: 1.1em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 2px;} response {display: block; margin:0;} div.button {margin: 2px 4px; padding: 2px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; height:1em; -moz-border-radius: 5px;} div.button a {color: white; font-weight: bold; font-size: 3em; text-align:center;} div.button a:link {color: white; text-decoration:none;} div.button a:hover {color:#F33;}</style><body><div id='banner'><a href='http://www.plurk.com' target='_blank'><img src='http://www.plurk.com/static/logo.png'></a></div><div id='container'><msgs><msg></msg></msgs></div><div id='loadmore' class='button'><a href='#'>Load more</a></div></body>",
 
 	onReady: function(slider){	
 		// When sidebar ready, preform reFreshPlurk()
 		sliderObj = slider;
 		reFreshPlurk();	
+		
+		// Add click event listener on loadmore button
+		$(sliderObj.contentDocument).find('#loadmore').click(function(){
+			loadMorePlurk();
+		})
 	},
     
 	onClick: function(slider){
@@ -88,6 +93,44 @@ function reFreshPlurk() {
 	});
 
 };
+
+
+/* ISO 8601 formatted dates example 
+	https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date */
+function ISODateString(d){
+ function pad(n){return n<10 ? '0'+n : n}
+ return d.getUTCFullYear() + '-' + pad(d.getUTCMonth()+1)+'-'
+      + pad(d.getUTCDate())+'T'
+      + pad(d.getUTCHours())+':'
+      + pad(d.getUTCMinutes())+':'
+      + pad(d.getUTCSeconds())}
+
+function loadMorePlurk() {
+	// When loadMorePlurk, get old plurks from OldOffset
+	$.ajax({
+		url: "http://www.plurk.com/API/Timeline/getPlurks",
+				data: ({
+					'api_key': loginStr.api_key,
+					'offset': ISODateString(new Date(OldOffset)),	// ISO 8601 format
+				}),	
+		success: function(json){
+			// Throw the loaded plurk to show plurk function
+			var jsObject = JSON.parse(json);
+			jsObject.plurks_users=jsObject.plurk_users;	// correct plurk api bugs…
+			//console.log(json)
+
+			ShowNewPlurk(jsObject);			
+			console.log('JetPlurk Load More: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
+		},
+		error: function(xhr, textStatus, errorThrown){
+			// Login error
+			console.log('Load More error: ' + xhr.status + ' ' + textStatus + ' ' + errorThrown);				
+		} 
+
+	});
+
+};
+
 
 function ShowNewPlurk(jsObject){
 	// Display each plurk
