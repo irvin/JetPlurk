@@ -1,5 +1,5 @@
 /*
- * JetPlurk 0.012 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help from
+ * JetPlurk 0.014dev cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help from
  * littlebtc, BobChao, Timdream & MozTW community. Some codes adapted from
  * JetWave http://go.bobchao.net/jetwave
  */
@@ -40,7 +40,7 @@ if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");;
 	console.log('Init. myStorage.ReadOffset: ' + myStorage.ReadOffset);
 }
-var JetPlurkVer = '0.013';
+var JetPlurkVer = '0.014dev';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset
@@ -298,21 +298,27 @@ function ShowNewPlurk(jsObject) {
 		var selectPlurkResponseNum = clickMsg.find("responseNum").text();
 		// console.log('Click: ' + selectPlurkID + ' responseNum ' +
 		// selectPlurkResponseNum);
-		
+
 		// If click msg has not showing response form, showing now
 		if ($(clickMsg).find("responses").html() == null) {
 
 			$(clickMsg).append('<responses></responses>');
 			// Show response form
-			var content = '<responseform class=\"'
+			var content = '<responseform id=\"responseform\" class=\"'
 					+ selectPlurkID
 					+ '\"><form id=\"responseform\"><textarea name=\"content\"></textarea>'
-					+ '<input type=\"submit\" value=\"Reponse\" /></form></responseform>'
+					+ '<input id=\"response_button\" type=\"submit\" value=\"Reponse\" /></form></responseform>'
 			$(clickMsg).find("responses").append(content);
 			// Add click event to response form, stop click to hide
 			// responses event
 			$(clickMsg).find("responseform").click(function(event) {
+						console.log("click responseform");
 						event.stopPropagation(); // Stop event bubble
+					});
+			$(clickMsg).find(":input:submit").click(function() {
+						console.log("click submit");
+						console.log($(clickMsg).find("textarea").val());
+						//event.stopPropagation(); // Stop event bubble
 					});
 
 			if (selectPlurkResponseNum != "") {
