@@ -298,58 +298,76 @@ function ShowNewPlurk(jsObject) {
 		var selectPlurkResponseNum = clickMsg.find("responseNum").text();
 		// console.log('Click: ' + selectPlurkID + ' responseNum ' +
 		// selectPlurkResponseNum);
+		
+		// If click msg has not showing response form, showing now
+		if ($(clickMsg).find("responses").html() == null) {
 
-		if ((selectPlurkResponseNum != "")
-				&& ($(clickMsg).find("responses").text() == "")) {
-			// If click msg has response & not showing now, get response
-			$.ajax({
-				url : "http://www.plurk.com/API/Responses/get",
-				data : ({
-					'api_key' : loginStr.api_key,
-					'plurk_id' : selectPlurkID,
-					'from_response' : 0
-				}),
-				success : function(json) {
-					// console.log('Get response: ' + json);
-					var jsObject = JSON.parse(json);
-
-					// Display each response
-					$(clickMsg).append('<responses></responses>');
-					$(jsObject.responses).each(function(i) {
-						var responser_id = jsObject.responses[i].user_id;
-						if (jsObject.friends[responser_id].display_name != '') {
-							var responser_display_name = jsObject.friends[responser_id].display_name;
-						} else {
-							var responser_display_name = jsObject.friends[responser_id].nick_name;
-						}
-						var postedtime = jsObject.responses[i].posted;
-						var timestr = postTime(jsObject.responses[i].posted);
-						if (jsObject.responses[i].qualifier_translated != null) {
-							// English qualifier
-							var qualifier = jsObject.responses[i].qualifier_translated;
-						} else {
-							var qualifier = jsObject.responses[i].qualifier;
-						}
-						var content = '<response>' + responser_display_name
-								+ ' ';
-						if (qualifier != '') {
-							content += '[' + qualifier + '] ';
-						}
-						content += jsObject.responses[i].content
-								+ ' <span class=\"meta\"><timestamp>' + timestr
-								+ '</timestamp></span></response>';
-						// console.log(content);
-						$(clickMsg).find("responses").append(content);
+			$(clickMsg).append('<responses></responses>');
+			// Show response form
+			var content = '<responseform class=\"'
+					+ selectPlurkID
+					+ '\"><form id=\"responseform\"><textarea name=\"content\"></textarea>'
+					+ '<input type=\"submit\" value=\"Reponse\" /></form></responseform>'
+			$(clickMsg).find("responses").append(content);
+			// Add click event to response form, stop click to hide
+			// responses event
+			$(clickMsg).find("responseform").click(function(event) {
+						event.stopPropagation(); // Stop event bubble
 					});
-					// console.log($(clickMsg).html());
-				},
-				error : function(xhr, textStatus, errorThrown) {
-					console.log('Get response error: ' + xhr.status + ' '
-							+ textStatus + ' ' + errorThrown);
-				}
-			});
-		} else if ($(clickMsg).find("responses").text() != "") {
-			// If showing response now, remove it
+
+			if (selectPlurkResponseNum != "") {
+				// If click msg has response & not showing now, get response
+				$.ajax({
+					url : "http://www.plurk.com/API/Responses/get",
+					data : ({
+						'api_key' : loginStr.api_key,
+						'plurk_id' : selectPlurkID,
+						'from_response' : 0
+					}),
+					success : function(json) {
+						// console.log('Get response: ' + json);
+						var jsObject = JSON.parse(json);
+
+						// Display each response
+						$(jsObject.responses).each(function(i) {
+							var responser_id = jsObject.responses[i].user_id;
+							if (jsObject.friends[responser_id].display_name != '') {
+								var responser_display_name = jsObject.friends[responser_id].display_name;
+							} else {
+								var responser_display_name = jsObject.friends[responser_id].nick_name;
+							}
+							var postedtime = jsObject.responses[i].posted;
+							var timestr = postTime(jsObject.responses[i].posted);
+							if (jsObject.responses[i].qualifier_translated != null) {
+								// English qualifier
+								var qualifier = jsObject.responses[i].qualifier_translated;
+							} else {
+								var qualifier = jsObject.responses[i].qualifier;
+							}
+							var content = '<response>' + responser_display_name
+									+ ' ';
+							if (qualifier != '') {
+								content += '[' + qualifier + '] ';
+							}
+							content += jsObject.responses[i].content
+									+ ' <span class=\"meta\"><timestamp>'
+									+ timestr
+									+ '</timestamp></span></response>';
+							// console.log(content);
+							$(clickMsg).find("responseform").before(content);
+						});
+						// console.log($(clickMsg).html());
+
+					},
+					error : function(xhr, textStatus, errorThrown) {
+						console.log('Get response error: ' + xhr.status + ' '
+								+ textStatus + ' ' + errorThrown);
+					}
+				});
+			}
+
+		} else {
+			// If showing <responses> now, remove it
 			$(clickMsg).find("responses").fadeOut('fast', function() {
 						$(clickMsg).find("responses").remove();
 					});
