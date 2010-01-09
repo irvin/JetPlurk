@@ -313,13 +313,15 @@ function ShowNewPlurk(jsObject) {
 			// responses event
 			$(clickMsg).find("responseform").click(function(event) {
 						console.log("click responseform");
+						event.preventDefault();
 						event.stopPropagation(); // Stop event bubble
 					});
-			$(clickMsg).find(":input:submit").click(function(event) {
-				console.log("click submit");
-				console.log($(clickMsg).find("textarea").val());
-				event.stopPropagation(); // Stop event bubble
-				});
+			$(clickMsg).find(":submit").click(function(event) {
+						console.log("click submit");
+						console.log($(clickMsg).find("textarea").val());
+						event.preventDefault();
+						event.stopPropagation(); // Stop event bubble
+					});
 
 			if (selectPlurkResponseNum != "") {
 				// If click msg has response & not showing now, get response
