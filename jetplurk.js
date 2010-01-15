@@ -1,6 +1,6 @@
 /*
- * JetPlurk 0.014dev cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help from
- * littlebtc, BobChao, Timdream & MozTW community. Some codes adapted from
+ * JetPlurk 0.014dev cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
+ * from littlebtc, BobChao, Timdream & MozTW community. Some codes adapted from
  * JetWave http://go.bobchao.net/jetwave
  */
 
@@ -43,6 +43,7 @@ if (myStorage.ReadOffset == null) {
 var JetPlurkVer = '0.014dev';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
+var user_displayname = null;
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset
 		+ ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
 
@@ -102,6 +103,7 @@ function reFreshPlurk() {
 
 			// Show user meta
 			var avatarurl = '';
+			user_displayname = jsObject.user_info.display_name;
 			if ((jsObject.user_info.has_profile_image == 1)
 					&& (jsObject.user_info.avatar == null)) {
 				avatarurl = 'http://avatars.plurk.com/'
@@ -117,7 +119,7 @@ function reFreshPlurk() {
 
 			var content = "<div id='usermeta'><img id='useravatar' src='"
 					+ avatarurl + "' /><span class='displayname'>"
-					+ jsObject.user_info.display_name
+					+ user_displayname
 					+ "</span> <span class='karma'>Karma:"
 					+ jsObject.user_info.karma + "</span></div>";
 			$(sliderObj.contentDocument).find("#usermeta").replaceWith(content);
@@ -317,11 +319,60 @@ function ShowNewPlurk(jsObject) {
 						event.stopPropagation(); // Stop event bubble
 					});
 			$(clickMsg).find(":submit").click(function(event) {
-						console.log("click submit");
-						console.log($(clickMsg).find("textarea").val());
-						event.preventDefault();
-						event.stopPropagation(); // Stop event bubble
-					});
+				// when click response form submit button, check
+				// textarea, and submit response
+				console.log("click submit");
+				var response_txt = $(clickMsg).find("textarea").val();
+				if (response_txt != "") {
+
+					$.ajax({
+						url : "http://www.plurk.com/API/Responses/responseAdd",
+						data : ({
+							'api_key' : loginStr.api_key,
+							'plurk_id' : selectPlurkID,
+							'content' : response_txt,
+							'qualifier' : ':'
+						}),
+						success : function(json) {
+							console.log('Responsed: ' + json);
+							
+							// Display new response
+							var reObject = JSON.parse(json);
+							console.log(reObject.lang);
+
+								var responser_id = reObject.user_id;
+								responser_display_name = user_displayname;
+								
+								var postedtime = reObject.posted;
+								var timestr = postTime(reObject.posted);
+								if (reObject.qualifier_translated != null) {
+									// English qualifier
+									var qualifier = reObject.qualifier_translated;
+								} else {
+									var qualifier = reObject.qualifier;
+								}
+								var content = '<response>'
+										+ responser_display_name + ' ';
+								if (qualifier != '') {
+									content += '[' + qualifier + '] ';
+								}
+								content += reObject.content
+										+ ' <span class=\"meta\"><timestamp>'
+										+ timestr
+										+ '</timestamp></span></response>';
+								console.log(content);
+								$(clickMsg).find("responseform")
+										.before(content);
+										
+								$(clickMsg).find("responseform").onreset();	
+
+						}
+					})
+
+				}
+				event.preventDefault();
+				event.stopPropagation(); // Stop event bubble
+			});
 
 			if (selectPlurkResponseNum != "") {
 				// If click msg has response & not showing now, get response
