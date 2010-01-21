@@ -91,8 +91,10 @@ function reFreshPlurk() {
 			// console.log(json)
 			
 			// Wipe out old msg
-			$(sliderObj.contentDocument).find("msg").fadeOut('slow');
-			ShowNewPlurk(jsObject);
+			$(sliderObj.contentDocument).find("msg").fadeOut('medium', function() {
+				$(sliderObj.contentDocument).find("msg").remove();
+				ShowNewPlurk(jsObject);
+			});
 			NewOffset = Date.parse(new Date()); // Remember refresh time
 			console.log('JetPlurk refresh: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
 			
