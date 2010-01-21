@@ -400,8 +400,10 @@ function ShowNewPlurk(jsObject) {
 	
 	// Force all link open in new tabs, From littlebtc.
 	$(sliderObj.contentDocument).find("msgs").find('a').click(function(e) {
+		// console.log(this.href);
 		if (this.href) {
 			jetpack.tabs.open(this.href);
+			// jetpack.tabs.focus();  
 		}
 		e.preventDefault();
 		e.stopPropagation();
