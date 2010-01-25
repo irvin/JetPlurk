@@ -1,5 +1,5 @@
 /*
- * JetPlurk 0.014 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
+ * JetPlurk 0.016 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
  * from littlebtc, BobChao, Timdream & MozTW community. Some codes adapted from
  * JetWave http://go.bobchao.net/jetwave
  */
@@ -36,9 +36,8 @@ var sliderObj = null; // Save slide object
 var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
-	console.log('Init. myStorage.ReadOffset: ' + myStorage.ReadOffset);
 }
-var JetPlurkVer = '0.016dev';
+var JetPlurkVer = '0.016';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 var user_displayname = null;
@@ -211,11 +210,11 @@ function ShowNewPlurk(jsObject) {
 		var response_seen = jsObject.plurks[i].responses_seen;
 		var postedtime = jsObject.plurks[i].posted;
 		var timestr = postTime(jsObject.plurks[i].posted);
-		var content = '<msg id=\"' + jsObject.plurks[i].plurk_id;
+		var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\" postime=\"' + postedtime + '\"';
 		
 		if ((read == 1) || ((ReadOffset < Date.parse(postedtime)) && (response_count == 0))) {
 			// If message is unread
-			content += '\" class=\"unread\">';
+			content += ' class=\"unread\">';
 		}
 		else if (response_seen < response_count) {
 			// If message response num. higher than seen-responses number
@@ -232,12 +231,12 @@ function ShowNewPlurk(jsObject) {
 			content += '[' + qualifier + '] ';
 		}
 		
-		content += jsObject.plurks[i].content + '</content><span class=\"meta\"><timestamp>' + timestr + ' </timestamp><a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a>';
+		content += jsObject.plurks[i].content + '</content><span class=\"meta\"><timestr>' + timestr + '</timestr> <a class=\"permalink\" href=\"http://www.plurk.com/m/p/' + premalink + '\" target=\"_blank\">link</a>';
 		if (response_count > 0) { // If has response
 			content += '<responseNum>' + response_count + '</responseNum>';
 		}
 		content += '</span></msg>';
-		console.log(content);
+		// console.log('read ' + read + ' ' + content);
 		$(sliderObj.contentDocument).find("msgs").append(content);
 		OldOffset = Date.parse(postedtime); // Remember oldest loaded plurk time
 	});
@@ -246,8 +245,8 @@ function ShowNewPlurk(jsObject) {
 	$(sliderObj.contentDocument).find("msg").hover(function() {
 		var hoverMsg = $(this);
 		var selectPlurkID = parseInt(hoverMsg.attr("id"));
-		var selectPlurkRead = hoverMsg.find("content").attr("class");
-		var selectPlurkTimestamp = hoverMsg.find("timestamp").text();
+		var selectPlurkRead = hoverMsg.attr("class");
+		var selectPlurkTimestamp = hoverMsg.attr("postime");
 		// console.log('Hover: ' + selectPlurkID + ' Read [' + selectPlurkRead + '] Plurk time: ' + selectPlurkTimestamp + Date.parse(selectPlurkTimestamp) + ' ReadOffset ' + ReadOffset);
 		
 		if ((selectPlurkRead == 'unread') || (selectPlurkRead == 'unreadresponse')) {
@@ -261,7 +260,7 @@ function ShowNewPlurk(jsObject) {
 				}),
 				success: function(json) {
 					// console.log('Set read: ' + json);
-					$(hoverMsg).find("content").removeClass("unread").removeClass("unreadresponse");
+					$(hoverMsg).removeClass("unread").removeClass("unreadresponse");
 					if (Date.parse(selectPlurkTimestamp) > ReadOffset) {
 						ReadOffset = Date.parse(selectPlurkTimestamp);
 						myStorage.ReadOffset = ReadOffset;
@@ -269,10 +268,7 @@ function ShowNewPlurk(jsObject) {
 					}
 				},
 				error: function(xhr, textStatus, errorThrown) {
-					console.log('Set read error: ' + xhr.status + ' ' +
-					textStatus +
-					' ' +
-					errorThrown);
+					console.log('Set read error: ' + xhr.status + ' ' + textStatus + ' ' + errorThrown);
 				}
 			});
 		}
@@ -293,7 +289,7 @@ function ShowNewPlurk(jsObject) {
 			$(clickMsg).append('<responses></responses>');
 			// Show response form
 			var content = '<form id=\"responseform\" class=\"' + selectPlurkID + '\"><textarea name=\"content\" rows="1"></textarea>' + '<input id=\"response_button\" type=\"submit\" value=\"Reponse\" /></form>';
-
+			
 			$(clickMsg).find("responses").append(content);
 			// Add click event to response form, stop click to hide responses event
 			$(clickMsg).find("form#responseform").click(function(event) {
@@ -334,8 +330,8 @@ function ShowNewPlurk(jsObject) {
 							if (qualifier != '') {
 								content += '[' + qualifier + '] ';
 							}
-							content += reObject.content + ' <span class=\"meta\"><timestamp>' + timestr + '</timestamp></span></response>';
-							//console.log(content);
+							content += reObject.content + ' <span class=\"meta\"><timestr>' + timestr + '</timestr></span></response>';
+							// console.log(content);
 							$(clickMsg).find("form#responseform").before(content);
 							$(clickMsg).find("form#responseform").get(0).reset();
 							
@@ -382,7 +378,7 @@ function ShowNewPlurk(jsObject) {
 							if (qualifier != '') {
 								content += '[' + qualifier + '] ';
 							}
-							content += jsObject.responses[i].content + ' <span class=\"meta\"><timestamp>' + timestr + '</timestamp></span></response>';
+							content += jsObject.responses[i].content + ' <span class=\"meta\"><timestr>' + timestr + '</timestr></span></response>';
 							// console.log(content);
 							$(clickMsg).find("form#responseform").before(content);
 						});
