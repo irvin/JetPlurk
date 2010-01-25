@@ -1,5 +1,5 @@
 /*
- * JetPlurk 0.016 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
+ * JetPlurk 0.017 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
  * from littlebtc, BobChao, Timdream & MozTW community. Some codes adapted from
  * JetWave http://go.bobchao.net/jetwave
  */
@@ -37,7 +37,7 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '0.016';
+var JetPlurkVer = '0.017';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 var user_displayname = null;
@@ -90,8 +90,9 @@ function reFreshPlurk() {
 			// console.log(json)
 			
 			// Wipe out old msg
-			$(sliderObj.contentDocument).find("msg").fadeOut('medium', function() {
-				$(sliderObj.contentDocument).find("msg").remove();
+			$(sliderObj.contentDocument).find("msgs").fadeOut('medium', function() {
+				$(sliderObj.contentDocument).find("msgs").remove();
+				$(sliderObj.contentDocument).find('div#banner').after('<msgs></msgs>');
 				ShowNewPlurk(jsObject);
 			});
 			NewOffset = Date.parse(new Date()); // Remember refresh time
@@ -207,7 +208,7 @@ function ShowNewPlurk(jsObject) {
 		var premalink = jsObject.plurks[i].plurk_id.toString(36);
 		var read = jsObject.plurks[i].is_unread;
 		var response_count = jsObject.plurks[i].response_count;
-		var response_seen = jsObject.plurks[i].responses_seen;
+		var responses_seen = jsObject.plurks[i].responses_seen;
 		var postedtime = jsObject.plurks[i].posted;
 		var timestr = postTime(jsObject.plurks[i].posted);
 		var content = '<msg id=\"' + jsObject.plurks[i].plurk_id + '\" postime=\"' + postedtime + '\"';
@@ -216,7 +217,7 @@ function ShowNewPlurk(jsObject) {
 			// If message is unread
 			content += ' class=\"unread\">';
 		}
-		else if (response_seen < response_count) {
+		else if (responses_seen < response_count) {
 			// If message response num. higher than seen-responses number
 			content += ' class=\"unreadresponse\">';
 		}
@@ -236,7 +237,7 @@ function ShowNewPlurk(jsObject) {
 			content += '<responseNum>' + response_count + '</responseNum>';
 		}
 		content += '</span></msg>';
-		// console.log('read ' + read + ' ' + content);
+		// console.log('read ' + read + ' response_count ' + response_count + ' responses_seen ' + responses_seen + ' ' + content);
 		$(sliderObj.contentDocument).find("msgs").append(content);
 		OldOffset = Date.parse(postedtime); // Remember oldest loaded plurk time
 	});
@@ -251,12 +252,13 @@ function ShowNewPlurk(jsObject) {
 		
 		if ((selectPlurkRead == 'unread') || (selectPlurkRead == 'unreadresponse')) {
 			// if unread or unreadresponse, set to read when hover
+			var boTrue = new Boolean(true);
 			$.ajax({
 				url: "http://www.plurk.com/API/Timeline/markAsRead",
 				data: ({
 					'api_key': loginStr.api_key,
 					'ids': JSON.stringify([selectPlurkID]),
-					'note_position': true
+					'note_position': JSON.stringify(boTrue)
 				}),
 				success: function(json) {
 					// console.log('Set read: ' + json);
