@@ -15,6 +15,9 @@ irvinfly@gmail.com
 0.015: Reformated source code and remove unused responseform tag. 
 0.016: Code optimization, fix plurk without responsed always display as unread bug. Known issue: if click on slidesbar icon twice too quick, refresh will hang.
 0.017: Fix a bug causing continuous reload when refresh new plurk since 016.
+0.018: Sending plurk function.
 
 -Known issue-
 * Sometimes open response will failed occasionally.
+* Continuous multiple plurks from the same person will show only one, due to bug of plurk API.
+* Set read status to plurk with response malfunction due to bug of plurk API.
