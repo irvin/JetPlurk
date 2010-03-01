@@ -16,6 +16,7 @@ irvinfly@gmail.com
 0.016: Code optimization, fix plurk without responsed always display as unread bug. Known issue: if click on slidesbar icon twice too quick, refresh will hang.
 0.017: Fix a bug causing continuous reload when refresh new plurk since 016.
 0.018: Sending plurk function.
+0.019: Modified send plurk textbox width to fit in on Linux.
 
 -Known issue-
 * Sometimes open response will failed occasionally.

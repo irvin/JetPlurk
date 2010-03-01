@@ -1,5 +1,5 @@
 /*
- * JetPlurk 0.018 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
+ * JetPlurk 0.019 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
  * from littlebtc, BobChao, Timdream & MozTW community. Some codes adapted from
  * JetWave http://go.bobchao.net/jetwave
  */
@@ -37,7 +37,7 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '0.018';
+var JetPlurkVer = '0.019';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 var user_displayname = null;
@@ -46,7 +46,7 @@ console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset + ' Old
 
 var basecss = "<style>body {margin: 0; background-color: BurlyWood; font-size: 12px; line-height: 1.3em;}" +
 "#container { margin: 5px;} #banner {display:block; margin-bottom: 5px; } #banner img.jetplurk {border: 0px; float: left;} #banner #jetplurkmeta {position: absolute; font-size:0.8em; right:5px; top: 5px;} #banner #usermeta {height: 45px; margin-left: 3px; padding-top:4px;} #usermeta img.useravatar {float: left; margin: 0 6px;} #usermeta span {display:block; margin-top: 3px; margin-left: 3px;} #usermeta span.displayname {font-size: 2em; margin-top: 10px;}" +
-"form#sendform {display: block; padding: 0; margin: 5px 0;} form#sendform textarea {width: 210px; height: 25px; margin: 0; padding: 3px; font-size: 1.3em; border: 1px solid lightgray; vertical-align:middle;} form#sendform input {width: 60px; height: 25px; color: white; text-align: center; vertical-align: middle; font-size: 1.2em; margin: 0 0 0 5px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}" +
+"form#sendform {display: block; padding: 0; margin: 5px 0;} form#sendform textarea {width: 78%; height: 25px; margin: 0; padding: 3px; font-size: 1.3em; border: 1px solid lightgray; vertical-align:middle;} form#sendform input {width: 20%; height: 25px; color: white; text-align: center; vertical-align: middle; font-size: 1.2em; margin: 0 0 0 2%; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}" +
 "msgs {display: block; clear:both;} msg {display: block; margin-bottom: 4px; padding: 4px; background-color: Snow; -moz-border-radius: 5px; min-height: 2.5em; overflow: hidden;} msg:hover {background-color: White;} msg.unread content {font-weight: bold;} msg.unreadresponse content {color: DarkGreen;} msg span.meta {display:block; color: DarkGray; text-align: right; font-size: 0.9em;} msg responseNum {color: Chocolate; font-size: 2em; margin-left: 3px;} responses {display: block; line-height: 1.1em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 5px; } response {display: block; } form#responseform { margin: 0 0 3px 0; } form#responseform textarea {display: block; width: 100%; height: 1.8em; margin: 5px auto; padding: 4px; font-size: 1.1em; border: 1px solid lightgray;} form#responseform input {display: block; width: 100%; color: white; text-align:center; margin: 0 auto; padding: 3px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;} div#loadmore.button a {display: block; color: white; font-weight: bold; font-size: 1.8em; text-decoration:none; text-align:center; vertical-align:middle; margin: 3px 0px 5px 0px; padding: 5px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;} </style>";
 var basehtml = basecss + "<body><div id='container'>" +
 "<div id='banner'><a href='http://www.plurk.com' target='_blank'>" +
