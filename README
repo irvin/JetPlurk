@@ -1,5 +1,10 @@
-JetPlurk
-irvinfly@gmail.com
+JetPlurk α
+
+http://go.sto.tw/jetplurk
+Author: Irvin (irvinfly@gmail.com)
+CC: by-sa 2.5 TW, http://creativecommons.org/licenses/by-sa/2.5/tw/
+With the help from littlebtc, BobChao, Timdream & MozTW community.
+Some codes adapted from JetWave http://go.bobchao.net/jetwave
 
 -Change notes-
 0.005: Initial release with settings for account & password
@@ -18,7 +23,7 @@ irvinfly@gmail.com
 018: Sending plurk function.
 019: Modified send plurk textbox width to fit in on Linux.
 020: Rewrite send plurk code and slidebar html to avoid jetpack gallery codearea bug on edit page.
-
+021: Codes organized, change background color to silver gradient, fix link accidently opening in slidebar.
 
 -Known issue-
 * Sometimes open response will failed occasionally.

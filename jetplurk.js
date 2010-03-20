@@ -1,5 +1,5 @@
 /*
- * JetPlurk 0.021dev cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
+ * JetPlurk 0.021 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
  * from littlebtc, BobChao, Timdream & MozTW community. Some codes adapted from
  * JetWave http://go.bobchao.net/jetwave
  */
@@ -37,7 +37,7 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '0.021dev';
+var JetPlurkVer = '0.021';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
