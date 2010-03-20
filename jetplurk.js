@@ -47,7 +47,7 @@ var basehtml =
 <html>
 <head>
 <style><![CDATA[
-	body {margin: 0; background-color: BurlyWood; font-size: 12px; line-height: 1.3em;}
+	body {margin: 0; background-image: -moz-linear-gradient(top, Ivory, silver); font-size: 12px; line-height: 1.4em;}
 	#container { margin: 5px;}
 	#banner {display:block; margin-bottom: 5px;}
 	#banner img.jetplurk {border: 0px; float: left;}
@@ -66,7 +66,7 @@ var basehtml =
 	msg.unreadresponse content {color: DarkGreen;}
 	msg span.meta {display:block; color: DarkGray; text-align: right; font-size: 0.9em;}
 	msg responseNum {color: Chocolate; font-size: 2em; margin-left: 3px;}
-	responses {display: block; line-height: 1.1em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 5px;}
+	responses {display: block; line-height: 1.2em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 5px;}
 	response {display: block;}
 	form#responseform {margin: 0 0 3px 0;}
 	form#responseform textarea {width: 100%; height: 1.8em; margin: 5px auto; padding: 4px; font-size: 1.1em; border: 1px solid lightgray;}
@@ -456,7 +456,7 @@ function MsgShowResponse(clickMsg, selectPlurkID) {
 					content += "[" + qualifier + "] ";
 				}
 				content += jsObject.responses[i].content + " <span class='meta'><timestr>" + timestr + "</timestr></span></response>";
-				console.log(content);
+				// console.log(content);
 				$(clickMsg).find("form#responseform").before(content);
 			});
 			// console.log($(clickMsg).html());		
