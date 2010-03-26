@@ -1,5 +1,5 @@
 /*
- * JetPlurk 0.021 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
+ * JetPlurk 0.022 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
  * from littlebtc, BobChao, Timdream & MozTW community. Some codes adapted from
  * JetWave http://go.bobchao.net/jetwave
  */
@@ -37,7 +37,7 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '0.021';
+var JetPlurkVer = '0.022';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
@@ -105,6 +105,7 @@ jetpack.future.import('slideBar');
 jetpack.slideBar.append({
 	icon: "http://www.plurk.com/favicon.ico",
 	width: 300,
+	persist: true,
 	html: basehtml,
 	
 	onReady: function(slider) {
@@ -131,7 +132,6 @@ jetpack.slideBar.append({
 			event.stopPropagation(); // Stop event bubble
 		})
 	},
-	
 	onClick: function(slider) {
 		// preform reFreshPlurk() when click at plurk icon on slide
 		reFreshPlurk();
@@ -341,7 +341,7 @@ function ShowNewPlurk(jsObject) {
 	// Click msg to show response form & responses
 	$(sliderObj.contentDocument).find("msg").click(function() {
 		MsgClick($(this));
-	})
+	})	
 }
 
 function MsgHover(hoverMsg) {
