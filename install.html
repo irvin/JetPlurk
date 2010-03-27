@@ -5,40 +5,5 @@
 </head>
 <body>
 <h1>JetPlurk α</h1>
-<pre>
-http://go.sto.tw/jetplurk
-Author: Irvin (irvinfly@gmail.com)
-CC: by-sa 2.5 TW, http://creativecommons.org/licenses/by-sa/2.5/tw/
-With the help from littlebtc, BobChao, Timdream & MozTW community.
-Some codes adapted from JetWave http://go.bobchao.net/jetwave
-</pre> 
-<h2>Change Notes</h2>
-<pre>
-0.005: Initial release with settings for account & password
-006: force link open in tab; add permalink; style adjustment
-007: show display_name, time, adjust meta style
-008: onSelect slide msgs:hover to set unread to read works now, onClick Polling don't work than.
-009: Refresh work now, set read work now except msg has response (cause api always return json that any responses_seen as 0)
-010: New plurk with no response show as unread fix, implement simple storage to remember last read time.
-011: Click on plurk to show response, and click again un-show, adjust visual style.
-012: Click "Load more" to load older plurks. Add new banner image.
-013: Display user avatar & profiles, show posted & responsed time as time diff.
-014: Add response plurk function.
-015: Reformated source code and remove unused responseform tag. 
-016: Code optimization, fix plurk without responsed always display as unread bug. Known issue: if click on slidesbar icon twice too quick, refresh will hang.
-017: Fix a bug causing continuous reload when refresh new plurk since 016.
-018: Sending plurk function.
-019: Modified send plurk textbox width to fit in on Linux.
-020: Rewrite send plurk code and slidebar html to avoid jetpack gallery codearea bug on edit page.
-021: Codes organized, change background color to silver gradient, fix link accidently opening in slidebar.
-022: Make slidebar opening persist.
-</pre>
-<h2>Known issue</h2>
-<pre>
-* Sometimes open response will failed occasionally.
-* Continuous multiple plurks from the same person will show only one, due to bug of plurk API.
-* Set read status to plurk with response malfunction due to bug of plurk API.
-* Click on links in msg will mis-open and close msg responses along with new tab.
-</pre>
 </body>
 </html>

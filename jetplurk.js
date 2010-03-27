@@ -1,8 +1,14 @@
 /*
- * JetPlurk 0.022 cc:by-sa Author: Irvin (irvinfly@gmail.com) With the help
- * from littlebtc, BobChao, Timdream & MozTW community. Some codes adapted from
- * JetWave http://go.bobchao.net/jetwave
+ * JetPlurk α
+ * 
+ * http://go.sto.tw/jetplurk
+ * Author: Irvin (irvinfly@gmail.com)
+ * CC: by-sa 2.5 TW, http://creativecommons.org/licenses/by-sa/2.5/tw/
+ * With the help from littlebtc, BobChao, Timdream & MozTW community.
+ * Some codes adapted from JetWave http://go.bobchao.net/jetwave
+ * 
  */
+
 // Save username & password
 var manifest = {
 	settings: [{
@@ -27,7 +33,7 @@ set = jetpack.storage.settings;
 var loginStr = {
 	username: set.jetplurk.username,
 	password: set.jetplurk.password,
-	api_key: 'LGMTGe6MKqjPnplwd4xHkUFTXjKOy6lJ'
+	api_key: '8Sq7fQo7HA9MfGDiowDkMcRUYcsMk86t'
 };
 
 jetpack.future.import("storage.simple");
@@ -37,7 +43,7 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '0.022';
+var JetPlurkVer = '0.023';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);

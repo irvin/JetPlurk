@@ -25,6 +25,7 @@ Some codes adapted from JetWave http://go.bobchao.net/jetwave
 020: Rewrite send plurk code and slidebar html to avoid jetpack gallery codearea bug on edit page.
 021: Codes organized, change background color to silver gradient, fix link accidently opening in slidebar.
 022: Make slidebar opening persist.
+023: Change plurk API key.
 
 -Known issue-
 * Sometimes open response will failed occasionally.
