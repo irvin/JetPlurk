@@ -24,7 +24,13 @@ var manifest = {
 			type: "password",
 			label: "password"
 		}]
-	}, ]
+	}, 
+	{
+		name: "fontsize",
+		type: "range", 
+		label: "Font size",
+		min: 8, max: 20, default: 12
+	}]
 };
 
 jetpack.future.import("storage.settings");
@@ -43,10 +49,11 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '0.023';
+var JetPlurkVer = '024';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
+
 
 var basehtml = 
 <>
@@ -146,7 +153,7 @@ jetpack.slideBar.append({
 });
 
 function reFreshPlurk() {
-	// When reFreshPlurk, preform login and get newest plurk
+	// When reFreshPlurk, preform login and get newest plurk	
 	
 	$.ajax({
 		url: "http://www.plurk.com/API/Users/login",
@@ -335,6 +342,9 @@ function ShowNewPlurk(jsObject) {
 		$(sliderObj.contentDocument).find("msgs").append(content);
 		OldOffset = Date.parse(postedtime); // Remember oldest loaded plurk time
 	});
+	
+	//Set font size of display content
+	$(sliderObj.contentDocument).find('msg content').css("font-size",set.fontsize);	
 	
 	// Add hover event listener on each msg
 	$(sliderObj.contentDocument).find("msg").hover(function() {
