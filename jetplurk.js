@@ -222,6 +222,16 @@ var basehtml =
 		form#responseform input {width: 100%; color: white; text-align:center; margin: 0 auto; padding: 3px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}
 		div#loadmore a {display: block; color: white; font-weight: bold; font-size: 1.8em; text-decoration:none; text-align:center; vertical-align:middle; margin: 3px 0px 5px 0px; padding: 5px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}
 	]]></style>
+	<script id="msgTemplate" type="text/html">
+		<msg id='${plurk_id}' postime='${postedtime}' class='${readstatus}'>
+			<content>${owner_display_name} [${qualifier}] ${content}</content>
+			<span class='meta'>
+				<timestr>${timestr}</timestr>
+				<a class='permalink' href='http://www.plurk.com/m/p/${premalink}'>link</a>
+				<responseNum>${response_count}</responseNum>
+			</span>
+		</msg>
+	</script>
 	<base target="_blank" />
 </head>
 <body>
@@ -476,20 +486,9 @@ function ShowNewPlurk(jsObject) {
 			response_count: response_count
 		};
 		
-		var msgTemplate = 
-		<>
-			<msg id='${plurk_id}' postime='${postedtime}' class='${readstatus}'>
-				<content>${owner_display_name} [${qualifier}] $content</content>
-				<span class='meta'>
-					<timestr>${timestr}</timestr>
-					<a class='permalink' href='http://www.plurk.com/m/p/${premalink}'>link</a>
-					<responseNum>${response_count}</responseNum>
-				</span>
-			</msg>
-		</>		
-
 //		$(sliderObj.contentDocument).find("msgs").append(content);
-		$(sliderObj.contentDocument).find("msgs").append(msgTemplate, msgObject);
+		$("#msgTemplate").render(msgObject).appendTo("msgs");
+//		$(sliderObj.contentDocument).find("msgs").append(msgTemplate, msgObject);
 		console.log("debug!");
 		
 /*
