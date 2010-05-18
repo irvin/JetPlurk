@@ -27,6 +27,7 @@ Some codes adapted from JetWave http://go.bobchao.net/jetwave
 022: Make slidebar opening persist.
 023: Change plurk API key.
 024: Add setting for font size.
+025: [UI] Adjust style based on JetPlurk Comet
 
 -Known issue-
 * Sometimes open response will failed occasionally.
