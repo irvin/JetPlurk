@@ -1,5 +1,5 @@
 /*
- * JetPlurk α
+ * JetPlurk Alpha
  * 
  * http://go.sto.tw/jetplurk
  * Author: Irvin (irvinfly@gmail.com)
@@ -8,6 +8,143 @@
  * Some codes adapted from JetWave http://go.bobchao.net/jetwave
  * 
  */
+
+
+
+/*
+ * jQuery Templating Plugin
+ *   NOTE: Created for demonstration purposes.
+ * Copyright 2010, John Resig
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ */
+(function(jQuery){
+	// Override the DOM manipulation function
+	var oldManip = jQuery.fn.domManip;
+	
+	jQuery.fn.extend({
+		render: function( data ) {
+			return this.map(function(i, tmpl){
+				return jQuery.render( tmpl, data );
+			});
+		},
+		
+		// This will allow us to do: .append( "template", dataObject )
+		domManip: function( args ) {
+			// This appears to be a bug in the appendTo, etc. implementation
+			// it should be doing .call() instead of .apply(). See #6227
+			if ( args.length > 1 && args[0].nodeType ) {
+				arguments[0] = [ jQuery.makeArray(args) ];
+			}
+
+			if ( args.length === 2 && typeof args[0] === "string" && typeof args[1] !== "string" ) {
+				arguments[0] = [ jQuery.render( args[0], args[1] ) ];
+			}
+			
+			return oldManip.apply( this, arguments );
+		}
+	});
+	
+	jQuery.extend({
+		render: function( tmpl, data ) {
+			var fn;
+			
+			// Use a pre-defined template, if available
+			if ( jQuery.templates[ tmpl ] ) {
+				fn = jQuery.templates[ tmpl ];
+				
+			// We're pulling from a script node
+			} else if ( tmpl.nodeType ) {
+				var node = tmpl, elemData = jQuery.data( node );
+				fn = elemData.tmpl || jQuery.tmpl( node.innerHTML );
+			}
+
+			fn = fn || jQuery.tmpl( tmpl );
+			
+			// We assume that if the template string is being passed directly
+			// in the user doesn't want it cached. They can stick it in
+			// jQuery.templates to cache it.
+
+			if ( jQuery.isArray( data ) ) {
+				return jQuery.map( data, function( data, i ) {
+					return fn.call( data, jQuery, data, i );
+				});
+
+			} else {
+				return fn.call( data, jQuery, data, 0 );
+			}
+		},
+		
+		// You can stick pre-built template functions here
+		templates: {},
+
+		/*
+		 * For example, someone could do:
+		 *   jQuery.templates.foo = jQuery.tmpl("some long templating string");
+		 *   $("#test").append("foo", data);
+		 */
+
+		tmplcmd: {
+			each: {
+				_default: [ null, "$i" ],
+				prefix: "jQuery.each($1,function($2){with(this){",
+				suffix: "}});"
+			},
+			if: {
+				prefix: "if($1){",
+				suffix: "}"
+			},
+			else: {
+				prefix: "}else{"
+			},
+			html: {
+				prefix: "_.push(typeof $1==='function'?$1.call(this):$1);"
+			},
+			"=": {
+				_default: [ "this" ],
+				prefix: "_.push($.encode(typeof $1==='function'?$1.call(this):$1));"
+			}
+		},
+
+		encode: function( text ) {
+			return text != null ? document.createTextNode( text.toString() ).nodeValue : "";
+		},
+
+		tmpl: function(str, data, i) {
+			// Generate a reusable function that will serve as a template
+			// generator (and which will be cached).
+			var fn = new Function("jQuery","$data","$i",
+				"var $=jQuery,_=[];_.data=$data;_.index=$i;" +
+
+				// Introduce the data as local variables using with(){}
+				"with($data){_.push('" +
+
+				// Convert the template into pure JavaScript
+				str
+					.replace(/[\r\t\n]/g, " ")
+					.replace(/\${([^}]*)}/g, "{{= $1}}")
+					.replace(/{{(\/?)(\w+|.)(?:\((.*?)\))?(?: (.*?))?}}/g, function(all, slash, type, fnargs, args) {
+						var tmpl = jQuery.tmplcmd[ type ];
+
+						if ( !tmpl ) {
+							throw "Template not found: " + type;
+						}
+
+						var def = tmpl._default;
+
+						return "');" + tmpl[slash ? "suffix" : "prefix"]
+							.split("$1").join(args || def[0])
+							.split("$2").join(fnargs || def[1]) + "_.push('";
+					})
+				+ "');}return $(_.join('')).get();");
+
+			// Provide some basic currying to the user
+			return data ? fn.call( this, jQuery, data, i ) : fn;
+		}
+	});
+})(jQuery);
+
+
+
 
 // Save username & password
 var manifest = {
@@ -54,38 +191,37 @@ var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
 
-
 var basehtml = 
 <>
 <html>
 <head>
-<style><![CDATA[
-	body {margin: 0; background-image: -moz-linear-gradient(top, Ivory, silver); font-size: 12px; line-height: 1.4em;}
-	#container { margin: 5px;}
-	#banner {display:block; margin-bottom: 5px;}
-	#banner img.jetplurk {border: 0px; float: left;}
-	#banner #jetplurkmeta {position: absolute; font-size:0.8em; right:5px; top: 5px;}
-	#banner #usermeta {height: 45px; margin-left: 3px; padding-top:4px;}
-	#usermeta img.useravatar {float: left; margin: 0 6px;}
-	#usermeta span {display:block; margin-top: 3px; margin-left: 3px;}
-	#usermeta span.displayname {font-size: 2em; margin-top: 10px;}
-	form#sendform {padding: 0; margin: 5px 0;}
-	form#sendform input#text_area {width: 79%; height: 25px; margin: 0; padding: 3px; font-size: 1.3em; border: 1px solid lightgray; vertical-align:middle;}
-	form#sendform input#send_button {width: 20%; height: 25px; color: white; text-align: center; vertical-align: middle; font-size: 1.2em; float:right; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}
-	msgs {display: block; clear:both;}
-	msg {display: block; margin-bottom: 4px; padding: 4px; background-color: Snow; -moz-border-radius: 5px; min-height: 2.5em; overflow: hidden;}
-	msg:hover {background-color: White;}
-	msg.unread content {font-weight: bold;}
-	msg.unreadresponse content {color: DarkGreen;}
-	msg span.meta {display:block; color: DarkGray; text-align: right; font-size: 0.9em;}
-	msg responseNum {color: Chocolate; font-size: 2em; margin-left: 3px;}
-	responses {display: block; line-height: 1.2em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 5px;}
-	response {display: block;}
-	form#responseform {margin: 0 0 3px 0;}
-	form#responseform textarea {width: 100%; height: 1.8em; margin: 5px auto; padding: 4px; font-size: 1.1em; border: 1px solid lightgray;}
-	form#responseform input {width: 100%; color: white; text-align:center; margin: 0 auto; padding: 3px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}
-	div#loadmore a {display: block; color: white; font-weight: bold; font-size: 1.8em; text-decoration:none; text-align:center; vertical-align:middle; margin: 3px 0px 5px 0px; padding: 5px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}
-]]></style>
+	<style><![CDATA[
+		body {margin: 0; background-image: -moz-linear-gradient(top, Ivory, silver); font-size: 12px; line-height: 1.4em;}
+		#container { margin: 5px;}
+		#banner {display:block; margin-bottom: 5px;}
+		#banner img.jetplurk {border: 0px; float: left;}
+		#banner #jetplurkmeta {position: absolute; font-size:0.8em; right:5px; top: 5px;}
+		#banner #usermeta {height: 45px; margin-left: 3px; padding-top:4px;}
+		#usermeta img.useravatar {float: left; margin: 0 6px;}
+		#usermeta span {display:block; margin-top: 3px; margin-left: 3px;}
+		#usermeta span.displayname {font-size: 2em; margin-top: 10px;}
+		form#sendform {padding: 0; margin: 5px 0;}
+		form#sendform input#text_area {width: 79%; height: 25px; margin: 0; padding: 3px; font-size: 1.3em; border: 1px solid lightgray; vertical-align:middle;}
+		form#sendform input#send_button {width: 20%; height: 25px; color: white; text-align: center; vertical-align: middle; font-size: 1.2em; float:right; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}
+		msgs {display: block; clear:both;}
+		msg {display: block; margin-bottom: 4px; padding: 4px; background-color: Snow; -moz-border-radius: 5px; min-height: 2.5em; overflow: hidden;}
+		msg:hover {background-color: White;}
+		msg.unread content {font-weight: bold;}
+		msg.unreadresponse content {color: DarkGreen;}
+		msg span.meta {display:block; color: DarkGray; text-align: right; font-size: 0.9em;}
+		msg responseNum {color: Chocolate; font-size: 2em; margin-left: 3px;}
+		responses {display: block; line-height: 1.2em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 5px;}
+		response {display: block;}
+		form#responseform {margin: 0 0 3px 0;}
+		form#responseform textarea {width: 100%; height: 1.8em; margin: 5px auto; padding: 4px; font-size: 1.1em; border: 1px solid lightgray;}
+		form#responseform input {width: 100%; color: white; text-align:center; margin: 0 auto; padding: 3px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}
+		div#loadmore a {display: block; color: white; font-weight: bold; font-size: 1.8em; text-decoration:none; text-align:center; vertical-align:middle; margin: 3px 0px 5px 0px; padding: 5px; background: #B65217; border: 1px solid; border-color: #9E5227 #853F18 #853F18 #9E5227; -moz-border-radius: 5px; cursor: pointer;}
+	]]></style>
 	<base target="_blank" />
 </head>
 <body>
@@ -153,7 +289,8 @@ jetpack.slideBar.append({
 });
 
 function reFreshPlurk() {
-	// When reFreshPlurk, preform login and get newest plurk	
+	// When reFreshPlurk, preform login and get newest plurk
+	console.log("reFreshPlurk");
 	
 	$.ajax({
 		url: "http://www.plurk.com/API/Users/login",
@@ -190,7 +327,7 @@ function reFreshPlurk() {
 			
 			var content = "<div id='usermeta'><img class='useravatar' src='" + avatarurl + "' /><span class='displayname'>" + user_displayname + "</span> <span class='karma'>Karma:" + jsObject.user_info.karma + "</span></div>";
 			$(sliderObj.contentDocument).find("#usermeta").replaceWith(content);
-			
+			console.log("showusermeta");
 		},
 		error: function(xhr, textStatus, errorThrown) {
 			// Login error
@@ -292,7 +429,70 @@ function ShowNewPlurk(jsObject) {
 	// Display each plurk
 	
 	$(jsObject.plurks).each(function(i) {
+
 		var owner_id = jsObject.plurks[i].owner_id;
+		var read = jsObject.plurks[i].is_unread;
+		var response_count = jsObject.plurks[i].response_count;
+		var responses_seen = jsObject.plurks[i].responses_seen;
+		var postedtime = jsObject.plurks[i].posted;
+		
+		var msgObject = {
+			plurk_id: jsObject.plurks[i].plurk_id,
+			postedtime: postedtime,
+			readstatus: function (){
+				if ((read == 1) || ((ReadOffset < Date.parse(postedtime)) && (response_count == 0))) {
+				// If message is unread
+					return 'unread';
+				}
+				else if (responses_seen < response_count) {
+				// If message response num. higher than seen-responses number
+					return 'unreadresponse';
+				}
+				else {
+				// Message is read
+					return '';
+				}
+			},
+			owner_display_name: function() {
+				if (jsObject.plurks_users[owner_id].display_name != null) {
+					return jsObject.plurks_users[owner_id].display_name;
+				}
+				else {
+					return jsObject.plurks_users[owner_id].nick_name;
+				}
+			},
+			qualifier: function() {
+				if (jsObject.plurks[i].qualifier_translated != null) {
+					// English qualifier
+					return jsObject.plurks[i].qualifier_translated;
+				}
+				else {
+					return jsObject.plurks[i].qualifier;
+				}
+			},
+			content: jsObject.plurks[i].content,
+			timestr: postTime(jsObject.plurks[i].posted),
+			premalink: jsObject.plurks[i].plurk_id.toString(36),
+			response_count: response_count
+		};
+		
+		var msgTemplate = 
+		<>
+			<msg id='${plurk_id}' postime='${postedtime}' class='${readstatus}'>
+				<content>${owner_display_name} [${qualifier}] $content</content>
+				<span class='meta'>
+					<timestr>${timestr}</timestr>
+					<a class='permalink' href='http://www.plurk.com/m/p/${premalink}'>link</a>
+					<responseNum>${response_count}</responseNum>
+				</span>
+			</msg>
+		</>		
+
+//		$(sliderObj.contentDocument).find("msgs").append(content);
+		$(sliderObj.contentDocument).find("msgs").append(msgTemplate, msgObject);
+		console.log("debug!");
+		
+/*
 		if (jsObject.plurks_users[owner_id].display_name != null) {
 			var owner_display_name = jsObject.plurks_users[owner_id].display_name;
 		}
@@ -340,6 +540,8 @@ function ShowNewPlurk(jsObject) {
 		content += "</span></msg>";
 		// console.log('read ' + read + ' response_count ' + response_count + ' responses_seen ' + responses_seen + ' ' + content);
 		$(sliderObj.contentDocument).find("msgs").append(content);
+*/		
+
 		OldOffset = Date.parse(postedtime); // Remember oldest loaded plurk time
 	});
 	
