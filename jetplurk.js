@@ -29,7 +29,7 @@ var manifest = {
 		name: "fontsize",
 		type: "range", 
 		label: "Font size",
-		min: 8, max: 20, default: 12
+		min: 10, max: 20, default: 12
 	}]
 };
 
@@ -49,11 +49,10 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '025';
+var JetPlurkVer = '026';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
-
 
 var basehtml = 
 <>
@@ -61,7 +60,7 @@ var basehtml =
 <head>
 <style><![CDATA[
 	body {margin: 0; background: -moz-linear-gradient(top, #EBF4F7, #B3B3B3); font-size: 12px; line-height: 1.4em;}
-	.avatar {height: 45px; width: 45px; background: yellow; -moz-border-radius: 5px; border: 1px solid; border-color: #EEE #CCC #CCC #EEE;}
+	.avatar {height: 45px; width: 45px; -moz-border-radius: 5px; border: 1px solid; border-color: #EEE #CCC #CCC #EEE;}
 	.txtarea {height: 25px; -moz-border-radius: 10px; border: 1px solid #88280A; font-size: 1.3em; padding: 3px; overflow: hidden;}
 	.button {height: 25px; font-family: Sans-serif; color: white; font-size: 1.2em; text-align: center; text-decoration: none; background: -moz-linear-gradient(top, #E6713B, #C6431A); border: 1px solid #88280A; -moz-border-radius: 10px; cursor: pointer;}
 	#container { margin: 5px;}
@@ -188,7 +187,7 @@ function reFreshPlurk() {
 				avatarurl = 'http://www.plurk.com/static/default_medium.gif';
 			}
 			
-			var content = "<div id='usermeta'><a href='http://www.plurk.com'><img class='avatar' src='" + avatarurl + "' /></a><span class='displayname'>" + user_displayname + "</span> <span class='karma'>Karma:" + jsObject.user_info.karma + "</span></div>";
+			var content = "<div id='usermeta'><a href='http://www.plurk.com'><div class='avatar' style='background: url(" + avatarurl + ")'></div></a><span class='displayname'>" + user_displayname + "</span> <span class='karma'>Karma:" + jsObject.user_info.karma + "</span></div>";
 			$(sliderObj.contentDocument).find("#usermeta").replaceWith(content);
 			
 		},
@@ -344,7 +343,8 @@ function ShowNewPlurk(jsObject) {
 	});
 	
 	//Set font size of display content
-	$(sliderObj.contentDocument).find('msg content').css("font-size",set.fontsize);	
+	$(sliderObj.contentDocument).find('msg content').css("font-size",set.fontsize/10 +"em");	
+	$(sliderObj.contentDocument).find('msg content').css("line-height",set.fontsize/10 + 0.3 +"em");	
 	
 	// Add hover event listener on each msg
 	$(sliderObj.contentDocument).find("msg").hover(function() {
@@ -375,7 +375,7 @@ function MsgHover(hoverMsg) {
 			data: ({
 				'api_key': loginStr.api_key,
 				'ids': JSON.stringify([selectPlurkID]),
-				'note_position': JSON.stringify(boTrue)
+				'note_position': true
 			}),
 			success: function(json) {
 				// console.log('Set read: ' + json);
