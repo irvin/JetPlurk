@@ -3,7 +3,7 @@ JetPlurk α
 http://jetplurk.poslab.info/alpha
 Author: Irvin (irvinfly@gmail.com)
 CC: by-sa 2.5 TW, http://creativecommons.org/licenses/by-sa/2.5/tw/
-With the help from littlebtc, BobChao, Timdream & MozTW community.
+With the help from littlebtc, softcup, BobChao, Timdream & MozTW community.
 Some codes adapted from JetWave http://go.bobchao.net/jetwave
 
 -Change notes-
@@ -29,9 +29,9 @@ Some codes adapted from JetWave http://go.bobchao.net/jetwave
 024: Add setting for font size.
 025: [UI] Adjust style based on JetPlurk Comet.
 026: Adjust line-height with font-size option.
+027: [Fix] Open response no longer failed. [Add] RePlurk. Patch by @softcup.
 
 -Known issue-
-* Sometimes open response will failed occasionally.
 * Continuous multiple plurks from the same person will show only one, due to bug of plurk API.
 * Set read status to plurk with response malfunction due to bug of plurk API.
 * Click on links in msg will mis-open and close msg responses along with new tab.

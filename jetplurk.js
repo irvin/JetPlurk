@@ -4,7 +4,7 @@
  * http://go.sto.tw/jetplurk
  * Author: Irvin (irvinfly@gmail.com)
  * CC: by-sa 2.5 TW, http://creativecommons.org/licenses/by-sa/2.5/tw/
- * With the help from littlebtc, BobChao, Timdream & MozTW community.
+ * With the help from littlebtc, softcup, BobChao, Timdream & MozTW community.
  * Some codes adapted from JetWave http://go.bobchao.net/jetwave
  * 
  */
@@ -49,7 +49,7 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '026';
+var JetPlurkVer = '027';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
@@ -332,7 +332,18 @@ function ShowNewPlurk(jsObject) {
 			content += "[" + qualifier + "] ";
 		}
 		
-		content += jsObject.plurks[i].content + "</content><span class='meta'><timestr>" + timestr + "</timestr> <a class='permalink' href='http://www.plurk.com/m/p/" + premalink + "'>link</a>";
+		content += jsObject.plurks[i].content + "</content>";
+		content += "<span class='meta'><timestr>" + timestr + "</timestr> - "
+		content += "<a class='replurk'>RePlurk</a> - <a class='permalink' href='http://www.plurk.com/m/p/" + premalink + "'>link</a>";
+
+		/* Mute from @softcup, temporary disabled
+		if (jsObject.plurks[i].is_unread == 2) {
+			content += " - <a class='permalink Mute' value='0'>unMute</a>";
+		} else {
+
+			content += " - <a class='permalink Mute' value='2'>Mute</a>";
+		}
+		*/
 		if (response_count > 0) { // If has response
 			content += "<responseNum>" + response_count + "</responseNum>";
 		}
@@ -340,24 +351,64 @@ function ShowNewPlurk(jsObject) {
 		// console.log('read ' + read + ' response_count ' + response_count + ' responses_seen ' + responses_seen + ' ' + content);
 		$(sliderObj.contentDocument).find("msgs").append(content);
 		OldOffset = Date.parse(postedtime); // Remember oldest loaded plurk time
+		
+		// Add hover event listener on each msg
+
+		$(sliderObj.contentDocument).find("msg:last").hover(function() {
+			MsgHover($(this));
+		},
+function() {
+			// console.log("unHOVER!");
+		}).click(function() {	// Add click event listener on each msg
+			// Click msg to show response form & responses
+			MsgClick($(this));
+		}).attr('content_raw', jsObject.plurks[i].content_raw).attr('nick_name', jsObject.plurks_users[owner_id].nick_name).attr('link', 'http://www.plurk.com/p/' + premalink);
 	});
 	
 	//Set font size of display content
 	$(sliderObj.contentDocument).find('msg content').css("font-size",set.fontsize/10 +"em");	
 	$(sliderObj.contentDocument).find('msg content').css("line-height",set.fontsize/10 + 0.3 +"em");	
-	
-	// Add hover event listener on each msg
-	$(sliderObj.contentDocument).find("msg").hover(function() {
-		MsgHover($(this));
-	}, function() {
-		// console.log("unHOVER!");
+
+	// RePlurk
+	$(sliderObj.contentDocument).find("msg a.replurk").click(function(event) {
+		event.preventDefault();
+		event.stopPropagation(); // Stop event bubble
+
+		var pnode = $(this).parent().parent();
+		var txt = pnode.attr('link') + " ([ReP]) " + "@" + pnode.attr("nick_name") + ": " + pnode.attr("content_raw");
+		$(sliderObj.contentDocument).find("#sendform textarea.txtarea").val(txt);
 	});
+
 	
-	// Add click event listener on each msg
-	// Click msg to show response form & responses
-	$(sliderObj.contentDocument).find("msg").click(function() {
-		MsgClick($(this));
-	})	
+	/* Mute from @softcup, temporary diabled.
+	$(sliderObj.contentDocument).find("msg a.Mute").click(function(event) {
+		event.preventDefault();
+		event.stopPropagation(); // Stop event bubble
+
+		var mute = this;
+		var pnode = $(this).parent().parent();
+
+		$.ajax({
+
+			type: "POST",
+			url : "http://www.plurk.com/TimeLine/setMutePlurk",
+			data: "plurk_id=" + pnode.attr("id") + "&value=" + $(mute).attr("value"),
+
+			success: function() {
+
+				if ($(mute).attr("value") == 2) {
+
+					$(mute).html("unMute");
+					$(mute).attr("value", 0);
+				} else {
+					$(mute).html("Mute");
+					$(mute).attr("value", 2);
+
+				}
+			}
+		});
+	});
+	*/
 }
 
 function MsgHover(hoverMsg) {
@@ -400,7 +451,7 @@ function MsgClick(clickMsg){
 	// console.log('Click: ' + selectPlurkID + ' responseNum ' + selectPlurkResponseNum);
 	
 	// If click msg has not showing response form, showing now
-	if ($(clickMsg).find("responses").html() == null) {
+	if ($(clickMsg).find("responses").length <= 0) {
 	
 		$(clickMsg).append('<responses></responses>');
 		// Show response form
