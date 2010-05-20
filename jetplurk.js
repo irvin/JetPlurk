@@ -27,7 +27,7 @@ var manifest = {
 	}, 
 	{
 		name: "fontsize",
-		type: "range", 
+		type: "range",
 		label: "Font size",
 		min: 10, max: 20, default: 12
 	}]
@@ -49,7 +49,7 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '027';
+var JetPlurkVer = '028';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 console.log('JetPlurk ' + JetPlurkVer + ' Start: NewOffset ' + NewOffset + ' OldOffset ' + OldOffset + ' ReadOffset ' + ReadOffset);
@@ -80,6 +80,7 @@ var basehtml =
 	msg.unreadresponse content {color: DarkGreen;}
 	msg span.meta {display:block; color: DarkGray; text-align: right; font-size: 0.9em;}
 	msg responseNum {color: Chocolate; font-size: 2em; margin-left: 3px;}
+	msg a.replurk, msg a.mute {color: #0066FF; cursor: pointer;}
 	responses {display: block; line-height: 1.2em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 5px;}
 	response {display: block;}
 	#responseform {margin: 0 0 3px 0;}
@@ -135,14 +136,22 @@ jetpack.slideBar.append({
 			loadMorePlurk();
 			event.preventDefault();
 			event.stopPropagation(); // Stop event bubble
-		})
+		});
 
 		// Add click event listener on "Plurk" button for send plurk
 		$(sliderObj.contentDocument).find("input.button").click(function(event) {
 			sendPlurk();
 			event.preventDefault();
 			event.stopPropagation(); // Stop event bubble
-		})
+		});
+
+		$(sliderObj.contentDocument).find("#sendform textarea.txtarea").keypress(function (event) {
+			var len = this.value.length + this.value.split(/[\x20-\x7e]/).join("").length;
+			var H = Math.max(Math.ceil(len / 24) * 25, 25);
+			$(this).css("height", H);
+		}).keyup(function () {
+			$(this).trigger("keypress");
+		});
 	},
 	onClick: function(slider) {
 		// preform reFreshPlurk() when click at plurk icon on slide
@@ -152,7 +161,7 @@ jetpack.slideBar.append({
 });
 
 function reFreshPlurk() {
-	// When reFreshPlurk, preform login and get newest plurk	
+	// When reFreshPlurk, preform login and get newest plurk
 	
 	$.ajax({
 		url: "http://www.plurk.com/API/Users/login",
@@ -193,15 +202,15 @@ function reFreshPlurk() {
 		},
 		error: function(xhr, textStatus, errorThrown) {
 			// Login error
-			console.log('Login error: ' + xhr.status + ' ' + xhr.responseText);				
-		}	
+			console.log('Login error: ' + xhr.status + ' ' + xhr.responseText);
+		}
 	});
 };
 
 function sendPlurk() {
 	var sendFormObj = $(sliderObj.contentDocument).find('form#sendform');
 
-	// when click sendplurk form submit button, check textarea, and submit plurk	
+	// when click sendplurk form submit button, check textarea, and submit plurk
 	var response_txt = $(sendFormObj).find("textarea").val();
 	if (response_txt != "") {
 		$.ajax({
@@ -213,13 +222,14 @@ function sendPlurk() {
 			}),
 			success: function(json) {
 				// Display new response
-				reFreshPlurk();					
-				$(sendFormObj).find("textarea").attr('value', null);
+				reFreshPlurk();
+				$(sendFormObj).find("textarea").attr('value', "").trigger("keypress");
 			},
 			error: function(xhr, textStatus, errorThrown) {
-				console.log('Plurk error: ' + xhr.status + ' ' + xhr.responseText);	
+				console.log('Plurk error: ' + xhr.status + ' ' + xhr.responseText);
 			}
-		})
+		});
+		
 	}
 }
 
@@ -259,7 +269,7 @@ function postTime(d) {
 	else {
 		return (parseInt(timediff / 10080) + ' weeks ago');
 	}
-	
+
 }
 
 function loadMorePlurk() {
@@ -268,7 +278,7 @@ function loadMorePlurk() {
 		url: "http://www.plurk.com/API/Timeline/getPlurks",
 		data: ({
 			'api_key': loginStr.api_key,
-			// offset in ISO 8601 format	
+			// offset in ISO 8601 format
 			'offset': ISODateString(new Date(OldOffset))
 		}),
 		success: function(json) {
@@ -282,7 +292,7 @@ function loadMorePlurk() {
 		},
 		error: function(xhr, textStatus, errorThrown) {
 			// Login error
-			console.log('Load More error: ' + xhr.status + ' ' + xhr.responseText);			
+			console.log('Load More error: ' + xhr.status + ' ' + xhr.responseText);
 		}
 	});
 };
@@ -333,17 +343,21 @@ function ShowNewPlurk(jsObject) {
 		}
 		
 		content += jsObject.plurks[i].content + "</content>";
-		content += "<span class='meta'><timestr>" + timestr + "</timestr> - "
-		content += "<a class='replurk'>RePlurk</a> - <a class='permalink' href='http://www.plurk.com/m/p/" + premalink + "'>link</a>";
+		content += "<span class='meta'><timestr>" + timestr + "</timestr>";
 
-		/* Mute from @softcup, temporary disabled
+		// Mute / unMute from @softcup
+		/* temp disabled
 		if (jsObject.plurks[i].is_unread == 2) {
-			content += " - <a class='permalink Mute' value='0'>unMute</a>";
+			content += " - <a class='mute' value='0'>unMute</a>";
 		} else {
-
-			content += " - <a class='permalink Mute' value='2'>Mute</a>";
+			content += " - <a class='mute' value='2'>Mute</a>";
 		}
 		*/
+		// RePlurk
+		content += " - <a class='replurk'>RePlurk</a>";
+		// Link
+		content += " - <a class='permalink' href='http://www.plurk.com/m/p/" + premalink + "'>link</a>";
+
 		if (response_count > 0) { // If has response
 			content += "<responseNum>" + response_count + "</responseNum>";
 		}
@@ -351,23 +365,29 @@ function ShowNewPlurk(jsObject) {
 		// console.log('read ' + read + ' response_count ' + response_count + ' responses_seen ' + responses_seen + ' ' + content);
 		$(sliderObj.contentDocument).find("msgs").append(content);
 		OldOffset = Date.parse(postedtime); // Remember oldest loaded plurk time
-		
-		// Add hover event listener on each msg
 
-		$(sliderObj.contentDocument).find("msg:last").hover(function() {
-			MsgHover($(this));
-		},
-function() {
-			// console.log("unHOVER!");
-		}).click(function() {	// Add click event listener on each msg
+		$(sliderObj.contentDocument).find("msg:last")
+		.hover(
+			// Add hover event listener on each msg
+			function() {
+				MsgHover($(this));
+			},
+			function() {
+				// console.log("unHOVER!");
+			}
+		).click(function() {
+			// Add click event listener on each msg
 			// Click msg to show response form & responses
 			MsgClick($(this));
-		}).attr('content_raw', jsObject.plurks[i].content_raw).attr('nick_name', jsObject.plurks_users[owner_id].nick_name).attr('link', 'http://www.plurk.com/p/' + premalink);
+		})
+		.attr('content_raw', jsObject.plurks[i].content_raw)
+		.attr('nick_name', jsObject.plurks_users[owner_id].nick_name)
+		.attr('link', 'http://www.plurk.com/p/' + premalink);
 	});
 	
 	//Set font size of display content
-	$(sliderObj.contentDocument).find('msg content').css("font-size",set.fontsize/10 +"em");	
-	$(sliderObj.contentDocument).find('msg content').css("line-height",set.fontsize/10 + 0.3 +"em");	
+	$(sliderObj.contentDocument).find('msg content').css("font-size",set.fontsize/10 +"em");
+	$(sliderObj.contentDocument).find('msg content').css("line-height",set.fontsize/10 + 0.3 +"em");
 
 	// RePlurk
 	$(sliderObj.contentDocument).find("msg a.replurk").click(function(event) {
@@ -376,39 +396,31 @@ function() {
 
 		var pnode = $(this).parent().parent();
 		var txt = pnode.attr('link') + " ([ReP]) " + "@" + pnode.attr("nick_name") + ": " + pnode.attr("content_raw");
-		$(sliderObj.contentDocument).find("#sendform textarea.txtarea").val(txt);
+		$(sliderObj.contentDocument).find("#sendform textarea.txtarea").val(txt).trigger("keypress");
 	});
 
-	
-	/* Mute from @softcup, temporary diabled.
-	$(sliderObj.contentDocument).find("msg a.Mute").click(function(event) {
+	// Mute
+	$(sliderObj.contentDocument).find("msg a.mute").click(function(event) {
 		event.preventDefault();
 		event.stopPropagation(); // Stop event bubble
 
 		var mute = this;
 		var pnode = $(this).parent().parent();
-
 		$.ajax({
-
 			type: "POST",
 			url : "http://www.plurk.com/TimeLine/setMutePlurk",
 			data: "plurk_id=" + pnode.attr("id") + "&value=" + $(mute).attr("value"),
-
 			success: function() {
-
 				if ($(mute).attr("value") == 2) {
-
 					$(mute).html("unMute");
 					$(mute).attr("value", 0);
 				} else {
 					$(mute).html("Mute");
 					$(mute).attr("value", 2);
-
 				}
 			}
 		});
 	});
-	*/
 }
 
 function MsgHover(hoverMsg) {
@@ -462,7 +474,15 @@ function MsgClick(clickMsg){
 			// If click msg has response, get response
 			MsgShowResponse(clickMsg, selectPlurkID);
 		}
-		
+
+		$(clickMsg).find("textarea.txtarea").keypress(function (event) {
+			var len = this.value.length + this.value.split(/[\x20-\x7e]/).join("").length;
+			var H = Math.max(Math.ceil(len / 28) * 25, 25);
+			$(this).css("height", H);
+		}).keyup(function () {
+			$(this).trigger("keypress");
+		});
+
 		// Add click event to response form, stop click to hide responses event
 		$(clickMsg).find("form#responseform").click(function(event) {
 			event.preventDefault();
@@ -472,12 +492,12 @@ function MsgClick(clickMsg){
 			// when click response form submit button, check textarea, and submit response
 			var response_txt = $(clickMsg).find("textarea").val();
 			if (response_txt != "") {
-				SubmitResponse(clickMsg, selectPlurkID, response_txt)
+				SubmitResponse(clickMsg, selectPlurkID, response_txt);
 			}
 			event.preventDefault();
 			event.stopPropagation(); // Stop event bubble
-		});		
-		
+		});
+
 	}
 	else {
 		// If showing <responses> now, remove it
@@ -526,7 +546,7 @@ function MsgShowResponse(clickMsg, selectPlurkID) {
 				// console.log(content);
 				$(clickMsg).find("form#responseform").before(content);
 			});
-			// console.log($(clickMsg).html());		
+			// console.log($(clickMsg).html());
 		},
 		error: function(xhr, textStatus, errorThrown) {
 			console.log('Get response error: ' + xhr.status + ' ' + xhr.responseText);
@@ -569,6 +589,7 @@ function SubmitResponse(clickMsg, selectPlurkID, response_txt) {
 			// console.log(content);
 			$(clickMsg).find("form#responseform").before(content);
 			$(clickMsg).find("form#responseform").get(0).reset();
+			$(clickMsg).find("textarea.txtarea").trigger("keypress");
 		}
-	})
+	});
 }

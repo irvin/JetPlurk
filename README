@@ -29,7 +29,8 @@ Some codes adapted from JetWave http://go.bobchao.net/jetwave
 024: Add setting for font size.
 025: [UI] Adjust style based on JetPlurk Comet.
 026: Adjust line-height with font-size option.
-027: [Fix] Open response no longer failed. [Add] RePlurk. Patch by @softcup.
+027: [Fix] Open response no longer failed. [Add] RePlurk. Patch by @softcup
+028: [Add] Enlarge textarea when typing. by @softcup
 
 -Known issue-
 * Continuous multiple plurks from the same person will show only one, due to bug of plurk API.
