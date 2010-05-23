@@ -29,8 +29,15 @@ Some codes adapted from JetWave http://go.bobchao.net/jetwave
 024: Add setting for font size.
 025: [UI] Adjust style based on JetPlurk Comet.
 026: Adjust line-height with font-size option.
-027: [Fix] Open response no longer failed. [Add] RePlurk. Patch by @softcup
-028: [Add] Enlarge textarea when typing. by @softcup
+027: [Fix] Open response no longer failed. [Add] RePlurk. Patched by @softcup
+028: [Add] Enlarge textarea when typing, [UI] Add color and cursor on RePlurk link. Patched by @softcup
+029: [Add] Plurk filter for unread, private, responded.
+     [Add] Click on nickname to response someone.
+     [Add] Mute / Unmute plurk, hide muted plurks in unread list.
+     [Fix] Display broke image (without http://) on content. Above contributed from @softcup
+     [UI] Adjust UI according to JetPlurk Comet.
+     [Add] Add font size adjustment of plurk response content.
+     [UI] Adjust font size & line-height settings. Above contributed from @irvinfly
 
 -Known issue-
 * Continuous multiple plurks from the same person will show only one, due to bug of plurk API.
