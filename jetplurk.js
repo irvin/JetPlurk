@@ -49,7 +49,7 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '029';
+var JetPlurkVer = '030.dev';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 var filterKind = "filterAll";
@@ -63,13 +63,14 @@ var basehtml =
 	body {margin: 0; background: -moz-linear-gradient(top, #EBF4F7, #B3B3B3); font-size: 12px; line-height: 1.4em;}
 	img {border: none;}
 	.avatar {height: 45px; width: 45px; -moz-border-radius: 5px; -moz-box-shadow: 1px 1px 1px #3C5768;}
+	.avatar-small {height: 20px; width: 20px; margin-right: 2px; float: left;}
 	.txtarea {height: 25px; -moz-border-radius: 10px; border: 1px solid #88280A; font-size: 1.3em; padding: 3px; overflow: hidden;}
 	.button {height: 25px; font-family: Sans-serif; color: white; font-size: 1.2em; text-align: center; text-decoration: none; background: -moz-linear-gradient(top, #E6713B, #C6431A); border: 1px solid #88280A; -moz-border-radius: 10px; cursor: pointer;}
 	#container {padding-bottom: 10px;}
 	#banner {display:block; padding: 6px 6px 0 6px; background: -moz-linear-gradient(top, #80929E, #3C5768); color: white; }
 	#banner #jetplurkmeta {position: absolute; font-size:0.8em; right:6px; top: 6px;}
 	#banner #usermeta {height: 45px;}
-	#usermeta .avatar {float: left; margin: 0 7px 0 0;}
+	#usermeta .avatar, msg .avatar {float: left; margin: 0 7px 0 0;}
 	#usermeta span {display:block;}
 	#usermeta span.displayname {font-size: 2em; padding-top: 8px; margin-bottom: 3px;}
 	#sendform {padding: 0; margin: 9px 0;}
@@ -206,11 +207,11 @@ function reFreshPlurk() {
 			// Show user meta
 			var avatarurl = '';
 			user_displayname = jsObject.user_info.display_name;
-			if ((jsObject.user_info.has_profile_image == 1) && (jsObject.user_info.avatar == null)) {
+			if ((jsObject.user_info.has_profile_image == 1) && (jsObject.user_info.avatar == 0)) {
 				avatarurl = 'http://avatars.plurk.com/' + jsObject.user_info.uid + '-medium.gif';
 			}
 			else if ((jsObject.user_info.has_profile_image == 1) &&
-			(jsObject.user_info.avatar != null)) {
+			(jsObject.user_info.avatar > 0)) {
 				avatarurl = 'http://avatars.plurk.com/' + jsObject.user_info.uid + '-medium' + jsObject.user_info.avatar + '.gif';
 			}
 			else if (jsObject.user_info.has_profile_image == 0) {
@@ -345,6 +346,15 @@ function ShowNewPlurk(jsObject) {
 		else {
 			var owner_display_name = jsObject.plurks_users[owner_id].nick_name
 		}
+		var avatarurl = "http://www.plurk.com/static/default_medium.gif";
+		if (jsObject.plurks_users[owner_id].has_profile_image == 1) {
+			if (jsObject.plurks_users[owner_id].avatar <= 0) {
+				avatarurl = 'http://avatars.plurk.com/' + owner_id + '-medium.gif';
+			} else {
+				avatarurl = 'http://avatars.plurk.com/' + owner_id + '-medium' + jsObject.plurks_users[owner_id].avatar + '.gif';
+			}
+		}
+
 		if (jsObject.plurks[i].qualifier_translated != null) {
 			// English qualifier
 			var qualifier = jsObject.plurks[i].qualifier_translated;
@@ -373,7 +383,9 @@ function ShowNewPlurk(jsObject) {
 			content += ">";
 		}
 
-		content += "<content><span class='plurker' value='" + nick_name + "'>" + owner_display_name + "</span> ";
+		content += "<content>";
+		content += "<div class='avatar' style='background: url(" + avatarurl + ")'></div>";
+		content += "<span class='plurker' value='" + nick_name + "'>" + owner_display_name + "</span> ";
 		if (" :".indexOf(qualifier) < 0) {
 			content += "[" + qualifier + "] ";
 		}
@@ -386,6 +398,12 @@ function ShowNewPlurk(jsObject) {
 			content += " - <a class='mute' value='0'>unMute</a>";
 		} else {
 			content += " - <a class='mute' value='2'>Mute</a>";
+		}
+		// like / unlike from @softcup
+		if (jsObject.plurks[i].favorite) {
+			content += " - <a class='like' value='0'>unlike</a>";
+		} else {
+			content += " - <a class='like' value='1'>like</a>";
 		}
 		// RePlurk
 		content += " - <a class='replurk'>RePlurk</a>";
@@ -429,6 +447,53 @@ function ShowNewPlurk(jsObject) {
 			$(sliderObj.contentDocument).find("#sendform textarea.txtarea").val(txt).trigger("keypress");
 		});
 
+		// Mute
+		$(sliderObj.contentDocument).find("msg:last a.mute").click(function(event) {
+			event.preventDefault();
+			event.stopPropagation(); // Stop event bubble
+
+			var mute = this;
+			var pnode = $(this).parent().parent();
+			$.ajax({
+				type: "POST",
+				url : "http://www.plurk.com/TimeLine/setMutePlurk",
+				data: "plurk_id=" + pnode.attr("id") + "&value=" + $(mute).attr("value"),
+				success: function() {
+					if ($(mute).attr("value") == 2) {
+						$(mute).html("unMute");
+						$(mute).attr("value", 0);
+					} else {
+						$(mute).html("Mute");
+						$(mute).attr("value", 2);
+					}
+				}
+			});
+		});
+
+		// Favorite
+		$(sliderObj.contentDocument).find("msg:last a.like").click(function(event) {
+			event.preventDefault();
+			event.stopPropagation(); // Stop event bubble
+
+			var like = this
+			var val = ($(this).attr("value") == 1) ? "true" : "false";
+			var pnode = $(this).parent().parent();
+			$.ajax({
+				type: "POST",
+				url : "http://www.plurk.com/Favorites/set",
+				data: "plurk_id=" + pnode.attr("id") + "&favorite=" + val + "&token=" + loginStr.api_key,
+				success: function() {
+					if ($(like).attr("value") == 1) {
+						$(like).html("unlike");
+						$(like).attr("value", 0);
+					} else {
+						$(like).html("like");
+						$(like).attr("value", 1);
+					}
+				}
+			});
+		});
+
 		// Re someone:
 		$(sliderObj.contentDocument).find("msg:last span.plurker").click(function (event) {
 			event.preventDefault();
@@ -452,28 +517,6 @@ function ShowNewPlurk(jsObject) {
 	$(sliderObj.contentDocument).find('msg content').css("font-size",set.fontsize/10 +"em");
 	$(sliderObj.contentDocument).find('msg content').css("line-height",set.fontsize/10*1.1 +"em");
 
-	// Mute
-	$(sliderObj.contentDocument).find("msg a.mute").click(function(event) {
-		event.preventDefault();
-		event.stopPropagation(); // Stop event bubble
-
-		var mute = this;
-		var pnode = $(this).parent().parent();
-		$.ajax({
-			type: "POST",
-			url : "http://www.plurk.com/TimeLine/setMutePlurk",
-			data: "plurk_id=" + pnode.attr("id") + "&value=" + $(mute).attr("value"),
-			success: function() {
-				if ($(mute).attr("value") == 2) {
-					$(mute).html("unMute");
-					$(mute).attr("value", 0);
-				} else {
-					$(mute).html("Mute");
-					$(mute).attr("value", 2);
-				}
-			}
-		});
-	});
 }
 
 function MsgHover(hoverMsg) {
@@ -530,7 +573,7 @@ function MsgClick(clickMsg){
 
 		$(clickMsg).find("textarea.txtarea").keypress(function (event) {
 			var len = this.value.length + this.value.split(/[\x20-\x7e]/).join("").length;
-			var H = Math.max(Math.ceil(len / 24) * 25, 25);
+			var H = Math.max(Math.ceil(len / 28) * 25, 25);
 			$(this).css("height", H);
 		}).keyup(function () {
 			$(this).trigger("keypress");
@@ -583,6 +626,14 @@ function MsgShowResponse(clickMsg, selectPlurkID) {
 				else {
 					var responser_display_name = nick_name;
 				}
+				var avatarurl = "http://www.plurk.com/static/default_small.gif";
+				if (jsObject.friends[responser_id].has_profile_image == 1) {
+					if (jsObject.friends[responser_id].avatar <= 0) {
+						avatarurl = 'http://avatars.plurk.com/' + responser_id + '-small.gif';
+					} else {
+						avatarurl = 'http://avatars.plurk.com/' + responser_id + '-small' + jsObject.friends[responser_id].avatar + '.gif';
+					}
+				}
 				var postedtime = jsObject.responses[i].posted;
 				var timestr = postTime(jsObject.responses[i].posted);
 				if (jsObject.responses[i].qualifier_translated != null) {
@@ -592,7 +643,9 @@ function MsgShowResponse(clickMsg, selectPlurkID) {
 				else {
 					var qualifier = jsObject.responses[i].qualifier;
 				}
-				var content = "<response><span class='plurker' value='" + nick_name + "'>" + responser_display_name + "</span> ";
+				var content = "<response>";
+				content += '<div class="avatar-small" style="background: url(' + avatarurl + ')"></div>';
+				content += "<span class='plurker' value='" + nick_name + "'>" + responser_display_name + "</span> ";
 				if (" :".indexOf(qualifier) < 0) {
 					content += "[" + qualifier + "] ";
 				}
