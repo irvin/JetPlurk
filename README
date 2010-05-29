@@ -38,6 +38,7 @@ Some codes adapted from JetWave http://go.bobchao.net/jetwave
      [UI] Adjust UI according to JetPlurk Comet.
      [Add] Add font size adjustment of plurk response content.
      [UI] Adjust font size & line-height settings. Above contributed from @irvinfly
+030: [Add] Plurk list avatar. [Add] Favorite support. from @softcup
 
 -Known issue-
 * Continuous multiple plurks from the same person will show only one, due to bug of plurk API.
