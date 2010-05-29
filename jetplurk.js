@@ -49,7 +49,7 @@ var NewOffset = Date.parse(new Date()); // To remember latest refresh time
 if (myStorage.ReadOffset == null) {
 	myStorage.ReadOffset = Date.parse("January 1, 1975 00:00:00");
 }
-var JetPlurkVer = '030.dev';
+var JetPlurkVer = '030';
 var ReadOffset = myStorage.ReadOffset; // Latest read plurk post time
 var OldOffset = Date.parse(new Date()); // Oldest loaded plurk timestamp
 var filterKind = "filterAll";
@@ -62,15 +62,15 @@ var basehtml =
 <style><![CDATA[
 	body {margin: 0; background: -moz-linear-gradient(top, #EBF4F7, #B3B3B3); font-size: 12px; line-height: 1.4em;}
 	img {border: none;}
-	.avatar {height: 45px; width: 45px; -moz-border-radius: 5px; -moz-box-shadow: 1px 1px 1px #3C5768;}
-	.avatar-small {height: 20px; width: 20px; margin-right: 2px; float: left;}
+	.avatar {-moz-border-radius: 5px; -moz-box-shadow: 1px 1px 1px hsla(205,50%,33%, 0.5);}
 	.txtarea {height: 25px; -moz-border-radius: 10px; border: 1px solid #88280A; font-size: 1.3em; padding: 3px; overflow: hidden;}
 	.button {height: 25px; font-family: Sans-serif; color: white; font-size: 1.2em; text-align: center; text-decoration: none; background: -moz-linear-gradient(top, #E6713B, #C6431A); border: 1px solid #88280A; -moz-border-radius: 10px; cursor: pointer;}
 	#container {padding-bottom: 10px;}
 	#banner {display:block; padding: 6px 6px 0 6px; background: -moz-linear-gradient(top, #80929E, #3C5768); color: white; }
 	#banner #jetplurkmeta {position: absolute; font-size:0.8em; right:6px; top: 6px;}
 	#banner #usermeta {height: 45px;}
-	#usermeta .avatar, msg .avatar {float: left; margin: 0 7px 0 0;}
+	#usermeta .avatar, content .avatar {float: left; height: 45px; width: 45px; margin: 0 7px 0 0;}
+	response .avatar {float: right; height: 20px; width: 20px; margin: 0 -25px 0 0; background-color: yellow;}
 	#usermeta span {display:block;}
 	#usermeta span.displayname {font-size: 2em; padding-top: 8px; margin-bottom: 3px;}
 	#sendform {padding: 0; margin: 9px 0;}
@@ -79,17 +79,19 @@ var basehtml =
 	#filterPlurk {height: 23px;}
 	#filterPlurk div {float: left; height: 20px; margin: 0 5px -2px 0; padding: 5px 0.8em 0 0.8em; cursor: pointer; color: #80929E;}
 	#filterPlurk div.select {background-color: #EBF4F7; color: #3C5768; -moz-border-radius: 5px 5px 0 0;}	
+	content {display: block; margin-left: 50px;}
+	content .avatar {margin-left: -50px;}
 	msgs {display: block; clear:both; padding: 7px 5px 2px 5px; }
-	msg {display: block; margin-bottom: 4px; padding: 5px; background: -moz-linear-gradient(top, #FFFFFF, #F8F8F8); -moz-border-radius: 5px; min-height: 2.5em; overflow: hidden; 	border-right: 1px solid #B3B3B3; border-bottom: 1px solid #B3B3B3;}
+	msg {display: block; margin-bottom: 4px; padding: 5px; background: -moz-linear-gradient(top, #FFFFFF, #F8F8F8); -moz-border-radius: 5px; min-height: 2.5em; overflow: hidden; border-right: 1px solid #B3B3B3; border-bottom: 1px solid #B3B3B3;}
 	msg:hover {background: #FFFFFF;}
 	msg.unread content {font-weight: bold;}
 	msg.unreadresponse content {color: DarkGreen;}
 	msg span.meta {display:block; color: DarkGray; text-align: right; font-size: 0.9em;}
 	msg responseNum {color: Chocolate; font-size: 2em; margin-left: 3px;}
-	msg a.replurk, msg a.mute {color: Chocolate; cursor: pointer;}
+	msg a.replurk, msg a.mute, msg a.like {color: Chocolate; cursor: pointer;}
 	msg span.plurker {color: Chocolate; cursor: pointer;}
-	responses {display: block; line-height: 1.2em; overflow: hidden; margin:2px; border: solid lightgray thin; -moz-border-radius: 5px; padding: 5px;}
-	response {display: block;}
+	responses {display: block; line-height: 1.2em; overflow: hidden; margin:10px 2px 0 2px; clear: both; /* border: solid lightgray thin; -moz-border-radius: 5px; padding: 5px; */}
+	response {display: block; margin-bottom: 3px;}
 	#responseform {margin: 0 0 3px 0;}
 	#responseform textarea {width: 100%; margin: 5px auto;}
 	#responseform input.button {width: 100%;}
@@ -644,7 +646,7 @@ function MsgShowResponse(clickMsg, selectPlurkID) {
 					var qualifier = jsObject.responses[i].qualifier;
 				}
 				var content = "<response>";
-				content += '<div class="avatar-small" style="background: url(' + avatarurl + ')"></div>';
+				// content += '<div class="avatar" style="background: url(' + avatarurl + ')"></div>';
 				content += "<span class='plurker' value='" + nick_name + "'>" + responser_display_name + "</span> ";
 				if (" :".indexOf(qualifier) < 0) {
 					content += "[" + qualifier + "] ";
